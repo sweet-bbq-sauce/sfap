@@ -1,0 +1,5 @@
+build/
+win/
+src/config.h
+.vscode/
+doc/*
