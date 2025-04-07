@@ -1,5 +1,7 @@
 #include <string>
 #include <stdexcept>
+#include <string_view>
+#include <charconv>
 
 #include <net/address/host.hpp>
 #include <net/address/detect.hpp>
@@ -13,38 +15,36 @@ using namespace sfap;
 using namespace sfap::net;
 
 
-Host::Host() noexcept : _port( 0 ) {}
+Host::Host() noexcept :
+    _port( 0 ) {}
 
 
-Host::Host( std::string hostname, port_t port ) : _port( port ) {
+Host::Host( const std::string& hostname, port_t port ) :
+    _port( port ) {
 
     set_hostname( hostname );
 
 }
 
 
-Host::Host( std::string host ) {
+Host::Host( const std::string& host ) {
 
     const auto separator = host.find( ':' );
 
-    if ( separator == std::string::npos ) throw std::invalid_argument( "host must be in format \"hostname:port\"" );
+    if ( separator == std::string_view::npos ) throw std::invalid_argument( "host must be in format \"hostname:port\"" );
 
     set_hostname( host.substr( 0, separator ) );
 
-    try {
+    std::string_view port_string = host.substr( separator + 1 );
+    long int value = 0;
 
-        const auto value = std::stoi( host.substr( separator + 1 ) );
+    const auto [ptr, ec] = std::from_chars( port_string.data(), port_string.data() + port_string.size(), value );
 
-        if ( ( value < 0 ) || ( value > UINT16_MAX ) ) throw std::out_of_range( "port number is out of range 0-65535" );
+    if ( ec != std::errc() || ptr != port_string.data() + port_string.size() ) throw std::invalid_argument( "port is invalid" );
 
-        set_port( static_cast<port_t>( value ) );
+    if ( value < 0 || value > UINT16_MAX ) throw std::out_of_range( "port number must be in range 0-65535" );
 
-    }
-    catch ( const std::exception &e ) {
-
-        throw std::invalid_argument( "port is invalid: " + std::string( e.what() ) );
-
-    }
+    set_port( static_cast<port_t>( value ) );
 
 }
 
@@ -139,7 +139,7 @@ void Host::set_hostname( const std::string& hostname ) {
 }
 
 
-std::string Host::get_hostname() const noexcept {
+const std::string& Host::get_hostname() const noexcept {
 
     return _hostname;
 
@@ -192,7 +192,7 @@ sockaddr_storage Host::to_native() const {
 
     const int inet_result = inet_pton( family, canonical.c_str(), address );
 
-    if ( inet_result < 1 ) throw SocketException();
+    if ( inet_result < 0 ) throw SocketException();
     else if ( inet_result == 0 ) throw std::runtime_error( utils::glue( "address string \"", canonical, "\" is not valid (", ( family == AF_INET ) ? "IPv4" : "IPv6" , ")" ) );
     else return buffer;
 

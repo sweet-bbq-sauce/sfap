@@ -19,7 +19,7 @@ namespace sfap {
 
         timestamp_t timestamp( std::optional<timestamp_t> from ) {
 
-            const auto now = std::chrono::system_clock::now();
+            const auto now = std::chrono::high_resolution_clock::now();
 
             const auto ms = static_cast<timestamp_t>( std::chrono::duration_cast<std::chrono::milliseconds>( now.time_since_epoch() ).count() );
 

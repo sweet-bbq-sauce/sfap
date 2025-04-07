@@ -12,11 +12,11 @@ bool Session::accessible( const path_t& target ) const {
 
     #ifdef _WIN32
 
-        const auto* doubledot = L"..";
+        const auto doubledot = L"..";
 
     #else
 
-        const auto* doubledot = "..";
+        const auto doubledot = "..";
 
     #endif
 
@@ -27,18 +27,14 @@ bool Session::accessible( const path_t& target ) const {
 path_t Session::serverify( const path_t& path ) const {
 
     const std::string native = utils::path_to_string( path.native() );
+    const std::string begin = native.substr( 0, 2 );
 
     path_t resolved;
 
-    switch ( native[0] ) {
-
-        case '.':   resolved = root_directory / native.substr( 1 );     break;
-        case '~':   resolved = home_directory / native.substr( 1 );     break;
-        case '/':   resolved = native;      break;
-
-        default:    resolved = cwd_directory / native;
-
-    }
+    if ( begin == "./" ) resolved = root_directory / native.substr( 2 );
+    else if ( begin == "~/" ) resolved = home_directory / native.substr( 2 );
+    else if ( begin.front() == '/' ) resolved = native;
+    else resolved = cwd_directory / native;
 
     if ( accessible( resolved ) ) return resolved.native();
     else throw std::invalid_argument( "path " + resolved.string() + " is not accessible" );
@@ -51,8 +47,7 @@ path_t Session::userify( const path_t& path ) const {
 
     const auto relative = std::filesystem::relative( path, root_directory );
 
-    //if ( relative.native()[0] == '.' ) return "/"; 
-
-    return path_t( "/" / relative ).generic_string();
+    if ( relative.native()[0] == '.' ) return "/"; 
+    else return path_t( "/" / relative ).generic_string();
 
 }

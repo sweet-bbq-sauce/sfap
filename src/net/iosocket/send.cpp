@@ -51,7 +51,6 @@ void IOSocket::send( const void* data, qword_t size ) const {
 
     }
 
-
 }
 
 

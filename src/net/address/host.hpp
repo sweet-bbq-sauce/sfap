@@ -2,6 +2,7 @@
 
 
 #include <string>
+#include <string_view>
 
 #ifdef _WIN32
 
@@ -27,8 +28,8 @@ namespace sfap {
             public:
 
                 Host() noexcept;
-                Host( std::string hostname, port_t port );
-                Host( std::string host );
+                Host( const std::string& hostname, port_t port );
+                Host( const std::string& host );
                 Host( const sockaddr_storage& native );
 
                 bool operator==( const Host& other ) const noexcept;
@@ -42,7 +43,7 @@ namespace sfap {
                 std::string string() const noexcept;
 
                 void set_hostname( const std::string& hostname );
-                std::string get_hostname() const noexcept;
+                const std::string& get_hostname() const noexcept;
 
                 void set_port( port_t port ) noexcept;
                 port_t get_port() const noexcept;

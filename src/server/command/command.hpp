@@ -9,6 +9,7 @@
 #include <sfap.hpp>
 #include <server/session/session.hpp>
 #include <protocol/protocol.hpp>
+#include <net/iosocket/iosocket.hpp>
 
 
 namespace sfap {
@@ -20,7 +21,7 @@ namespace sfap {
 
             public:
 
-                using Procedure = std::function<void( Session& )>;
+                using Procedure = std::function<void( Session&, const net::IOSocket& )>;
 
 
                 Commands() = delete;

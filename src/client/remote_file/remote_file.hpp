@@ -25,7 +25,7 @@ namespace sfap {
 
             void close();
 
-            Client::remotefile_t get_id() const;
+            remotefile_t get_id() const;
 
             void flush() const;
 
@@ -68,13 +68,13 @@ namespace sfap {
         
         private:
 
-            RemoteFile( const Client& client, Client::remotefile_t file_id );
+            RemoteFile( const Client& client, remotefile_t file_id );
 
             std::optional<std::streamsize> _buffer_threshold;
             mutable std::ostringstream _output_buffer;
             mutable qword_t _gcount;
             Client _client;
-            Client::remotefile_t _file_id;
+            remotefile_t _file_id;
             bool _opened;
 
     };

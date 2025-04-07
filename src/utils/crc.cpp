@@ -1,5 +1,6 @@
 #include <string>
 #include <fstream>
+#include <memory>
 
 #ifdef _WIN32
 
@@ -68,15 +69,15 @@ crc_t CRC32::file( const path_t& file ) {
 
     if ( !input ) throw std::runtime_error( glue( "can't open file \"", utils::path_to_string( file ), "\"" ) );
 
-    char buffer[1024 * 16];
+    const auto buffer = std::make_unique<char[]>( config::defaults::buffer_size );
 
     crc_t crc = 0;
 
     while ( input ) {
 
-        input.read( buffer, sizeof( buffer ) );
+        input.read( buffer.get(), sizeof( buffer ) );
 
-        crc = static_cast<crc_t>( ::crc32( crc, reinterpret_cast<const Bytef*>( buffer ), static_cast<uInt>( input.gcount() ) ) );
+        crc = static_cast<crc_t>( ::crc32( crc, reinterpret_cast<const Bytef*>( buffer.get() ), static_cast<uInt>( input.gcount() ) ) );
 
         if ( crc == 0 ) throw std::runtime_error( "crc32() computation failed" );
         

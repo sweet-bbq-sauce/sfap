@@ -48,18 +48,18 @@ void protocol::receive_data( const net::IOSocket& sock, void* data, qword_t size
         while ( received < size ) {
 
             void* destination = static_cast<byte_t*>( data ) + received;
-            const qword_t chunk_size = sock.recvo<qword_t>();
+            const qword_t current_chunk_size = sock.recvo<qword_t>();
 
-            sock.recv( destination, chunk_size );
+            sock.recv( destination, current_chunk_size );
 
             const crc_t remote_crc = sock.recvo<crc_t>();
-            const crc_t local_crc = utils::CRC32::calculate( destination, chunk_size );
+            const crc_t local_crc = utils::CRC32::calculate( destination, current_chunk_size );
 
             if ( local_crc == remote_crc ) {
 
                 sock.sendo( true );
-                if ( local_hash ) local_hash.update( destination, chunk_size );
-                received += chunk_size;
+                if ( local_hash ) local_hash.update( destination, current_chunk_size );
+                received += current_chunk_size;
 
             }
             else sock.sendo( false );

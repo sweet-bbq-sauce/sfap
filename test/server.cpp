@@ -1,29 +1,29 @@
 #include <iostream>
 
 
-#include <server/server.hpp>
-#include <utils/format.hpp>
 #include <sfap.hpp>
-#include <crypto/hash.hpp>
+#include <server/server.hpp>
 #include <utils/log.hpp>
-#include <utils/crc.hpp>
-#include <protocol/transfer/transfer.hpp>
+#include <utils/magic/magic.hpp>
 
 
 using namespace sfap;
-using namespace sfap::utils;
-using namespace sfap::protocol;
 
 
 int main() {
 
     init();
 
-    const auto ssl = std::make_shared<crypto::SSLContext>( ( path_t )"../cert/key.pem", ( path_t )"../cert/cert.pem" );
-    net::Listener server( net::Address( net::Host( "0.0.0.0:6767" ), ssl ) );
-    const auto client = server.accept();
+    utils::Log::debug_mode = true;
 
-    receive_file( client, "test.bin" );
+    const utils::Magic magic;
+
+    const auto ssl = std::make_shared<crypto::SSLContext>( ( path_t )"../cert/key.pem", ( path_t )"../cert/cert.pem" );
+    Server server( net::Address( net::Host( "0.0.0.0:6767" ), ssl ) );
+
+    server.set_magic_context( magic );
+    
+    server.join();
 
     return EXIT_SUCCESS;
 

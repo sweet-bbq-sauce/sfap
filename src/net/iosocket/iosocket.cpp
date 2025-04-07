@@ -6,6 +6,7 @@
 #include <net/iosocket/iosocket.hpp>
 #include <crypto/context/context.hpp>
 #include <net/utils.hpp>
+#include <utils/log.hpp>
 
 
 using namespace sfap::net;

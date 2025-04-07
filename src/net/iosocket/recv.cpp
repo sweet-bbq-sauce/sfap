@@ -67,7 +67,7 @@ void IOSocket::recvd( data_t& data ) const {
 
     }
 
-    data.resize( size );
+    data = data_t( size );
 
     recv( data.data(), size );
 
@@ -108,11 +108,9 @@ std::string IOSocket::recvss() const {
 
 void IOSocket::recvsv( std::vector<std::string>& data ) const {
 
-    data.clear();
-
     const auto size = recvo<qword_t>();
 
-    data.reserve( size );
+    data = std::vector<std::string>( size );
 
     for ( qword_t i = 0; i < size; i++ ) data.push_back( recvss() );
 

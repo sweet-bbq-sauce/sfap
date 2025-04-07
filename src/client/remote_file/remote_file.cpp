@@ -41,7 +41,7 @@ RemoteFile::~RemoteFile() {
 
 void RemoteFile::close() {
 
-    _client.negotiate_command( CommandList::CLOSE );
+    _client._negotiate_command( CommandList::CLOSE );
 
     _client._sock.sendo( get_id() );
 

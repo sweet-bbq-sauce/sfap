@@ -9,6 +9,15 @@ namespace sfap {
     namespace protocol {
 
 
+        // 4 bytes that are sent by the client directly before the command code.
+        // Checking this by the server prevents the server from accidentally
+        // executing the command if the client sends unexpected data in the event of a desynchronization.
+        const dword_t precommand_header = 0x53464150;
+
+        // Username for already connected (not logged) user
+        const std::string default_username = "anonymous";
+
+
         enum class CommandList : word_t {
 
             NONE = 0x00,    // Empty command, does nothing
@@ -30,6 +39,7 @@ namespace sfap {
             STAT,           // Get entry stat info
             MAGIC,          // Get extended entry info from libMagic if supported
             EXISTS,         // Sprawdź czy obiekt istnieje
+            SPACE,          // Get disk space info
 
             // Filesystem manipulation
             TOUCH = 0x30,   // Create file
@@ -54,7 +64,12 @@ namespace sfap {
             TELLP,          // Get the writing pointer
             WRITE,          // Write to remote file
             READ,           // Read from remote file
-            IS_EOF          // Get remote file EOF
+            IS_EOF,         // Get remote file EOF,
+            GOOD,           // Check if file is good
+            GCOUNT          // Get last bytes read
+
+            // Admin tools
+            // soon ...
 
         };
 
@@ -78,6 +93,39 @@ namespace sfap {
             WRONG_PASSWORD,     // User exists but wrong password
             NEED_PASSWORD,      // Can not login with empty password
             TOO_MANY_USER_INSTANCES     // User has reached the maximum allowed sessions
+
+        };
+
+
+        enum class ConnectionResult : byte_t {
+
+            OK,
+            REJECTED,
+            SERVER_BUSY
+
+        };
+
+
+        enum class FilesystemResult : byte_t {
+
+            OK,
+            IS_NOT_DIRECTORY,
+            IS_NOT_FILE,
+            NOT_ACCESSIBLE,
+            NOT_EXISTS,
+            NOT_SUPPORTED
+
+        };
+
+
+        enum class FileIOResult : byte_t {
+
+            OK,
+            CAN_NOT_OPEN_FILE,
+            IS_NOT_FILE,
+            FILE_NOT_GOOD,
+            END_OF_FILE,
+            ID_NOT_EXISTS
 
         };
 

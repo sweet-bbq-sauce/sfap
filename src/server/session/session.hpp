@@ -21,6 +21,8 @@ namespace sfap {
 
             public:
 
+                friend class Commands;
+
                 Session( net::IOSocket&& sock, Server& parent );
 
                 Session( const Session& other ) = delete;
@@ -31,14 +33,12 @@ namespace sfap {
 
                 path_t root_directory, home_directory, cwd_directory;
 
-                net::IOSocket sock;
                 Server& parent;
-                bool shutdown;
+
+                void shutdown() noexcept;
 
                 bool accessible( const path_t& target ) const;
-
                 path_t serverify( const path_t& path ) const;
-
                 path_t userify( const path_t& path ) const;
 
                 std::unordered_map<dword_t, std::fstream> files;
@@ -57,6 +57,9 @@ namespace sfap {
                 void _session_loop();
 
                 dword_t _last_file_id;
+                bool _shutdown;
+
+                net::IOSocket _sock;
 
                 // User info
                 

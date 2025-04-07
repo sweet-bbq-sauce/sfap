@@ -25,8 +25,6 @@ namespace sfap {
 
             friend class RemoteFile;
 
-            using remotefile_t = dword_t;
-
             Client( const net::Address& address, std::optional<Credentials> credentials = std::nullopt, std::optional<path_t> remote_path = std::nullopt );
             Client& operator=( const Client& other ) = delete;
             Client( const Client& other );
@@ -103,7 +101,7 @@ namespace sfap {
              * @param deep włącza listowanie rekurencyjne.
              * @return Zwraca vector nazw obiektów. Jeśli opcja `deep` jest włączony to zwraca vector z ścieżkami względem katalogu.
              */
-            std::vector<path_t> ls( const path_t& directory = ".", bool deep = false ) const;
+            std::vector<EntryInfo> ls( const path_t& directory = ".", bool deep = false, bool hidden = false, bool stat = false, bool magic = false ) const;
 
             /**
              * @brief Znajdź obiekt lub obiekty w katalogu na podstawie `pattern`.
@@ -224,19 +222,20 @@ namespace sfap {
             void close_file( remotefile_t file ) const;
 
             void read( remotefile_t file, char* data, qword_t size ) const;
-            std::streamsize gcount( remotefile_t file ) const;
+            qword_t gcount( remotefile_t file ) const;
 
             void write( remotefile_t file, const char* data, qword_t size ) const;
 
-            std::streampos tellg( remotefile_t file ) const;
-            void seekg( remotefile_t file, std::streamoff offset, std::ios::seekdir dir ) const;
-            void seekg( remotefile_t file, std::streampos position ) const;
+            qword_t tellg( remotefile_t file ) const;
+            void seekg( remotefile_t file, qword_t offset, std::ios::seekdir dir ) const;
+            void seekg( remotefile_t file, qword_t position ) const;
 
-            std::streampos tellp( remotefile_t file ) const;
-            void seekp( remotefile_t file, std::streamoff offset, std::ios::seekdir dir ) const;
-            void seekp( remotefile_t file, std::streampos position ) const;
+            qword_t tellp( remotefile_t file ) const;
+            void seekp( remotefile_t file, qword_t offset, std::ios::seekdir dir ) const;
+            void seekp( remotefile_t file, qword_t position ) const;
 
             bool eof( remotefile_t file ) const;
+            bool good( remotefile_t file ) const;
 
             /**
              * @brief Otwórz zdalny plik w stylu std::fstream jako osobne połączenie.
@@ -252,11 +251,20 @@ namespace sfap {
              * @brief Negocjuj komende z serwerem. Podstawa każdej innej komendy.
              * @throws Serwer może nie puścić komendy z różnych względów.
              */
-            void negotiate_command( protocol::CommandList cmd ) const;
+            void _negotiate_command( protocol::CommandList cmd ) const;
 
             net::IOSocket _sock;
             std::optional<Credentials> _credentials;
             net::Address _address;
+
+            struct _remotefile_row {
+
+                bool eof, good;
+                qword_t gcount;
+
+            };
+
+            mutable std::unordered_map<remotefile_t, _remotefile_row> _remotefile_cache;
 
     };
 

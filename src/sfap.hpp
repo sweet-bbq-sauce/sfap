@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <cinttypes>
+#include <optional>
 
 #include <config.h>
 
@@ -36,6 +37,8 @@ namespace sfap {
     using path_t = std::filesystem::path;
     using timestamp_t = qword_t;
     using crc_t = dword_t;
+    using remotefile_t = dword_t;
+    
 
 
     #ifdef _WIN32
@@ -58,43 +61,29 @@ namespace sfap {
     };
 
 
-    class MagicInfo {
+    struct MagicInfo {
 
-        public:
-
-            friend class Client;
-
-            std::string get_description() const;
-            std::string get_mime() const;
-            std::string get_encoding() const;
-
-        
-        private:
-
-            MagicInfo( const std::string& description, const std::string& mime, const std::string& encoding );
-            
-            std::string _description, _mime, _encoding;
+        std::vector<std::string> description, mime, encoding;
 
     };
 
 
     struct StatInfo {
 
-        public:
+        std::string get_fixed_size() const;
 
-            friend class Client;
+        qword_t size;
+        std::filesystem::file_type type;
 
-            qword_t get_size() const;
-            path_t get_path() const;
-            std::filesystem::file_type get_type() const;
-            std::string get_fixed_size() const;
+    };
 
 
-        private:
+    struct EntryInfo {
 
-            qword_t size;
-            path_t path;
-            std::filesystem::file_type type;
+        path_t path;
+
+        std::optional<StatInfo> stat;
+        std::optional<MagicInfo> magic;
 
     };
 
@@ -103,7 +92,7 @@ namespace sfap {
 
         std::string version;
         std::vector<std::string> extensions;
-        qword_t time;
+        timestamp_t time;
 
     };
 

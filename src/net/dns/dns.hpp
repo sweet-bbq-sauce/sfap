@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <string_view>
 
 #include <net/address/detect.hpp>
 #include <net/address/address.hpp>

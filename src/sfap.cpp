@@ -34,57 +34,12 @@ namespace sfap {
     }
 
 
-    qword_t StatInfo::get_size() const {
-
-        return size;
-
-    }
-    
-    
-    path_t StatInfo::get_path() const {
-
-        return path;
-
-    }
-    
-    
-    std::filesystem::file_type StatInfo::get_type() const {
-
-        return type;
-
-    }
-
-
-    MagicInfo::MagicInfo( const std::string& description, const std::string& mime, const std::string& encoding ) :
-        _description( description ),
-        _mime( mime ),
-        _encoding( encoding ) {}
-
-
-    std::string MagicInfo::get_description() const {
-
-        return _description;
-
-    }
-
-
-    std::string MagicInfo::get_mime() const {
-
-        return _mime;
-
-    }
-
-
-    std::string MagicInfo::get_encoding() const {
-
-        return _encoding;
-
-    }
-
-
     void init( bool winsock, bool openssl ) {
 
         //std::setlocale( LC_TIME, "" );
+
+        static bool inited = false;
+        if ( inited ) return;
 
         #ifdef _WIN32
 
@@ -101,8 +56,12 @@ namespace sfap {
             
             SetConsoleMode( hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING );
 
-            WSADATA wsaData;
-            if ( WSAStartup( MAKEWORD( 2, 2 ), &wsaData ) != 0 ) throw std::runtime_error( "Can't init WinSock2" );
+            if ( winsock ) {
+
+                WSADATA wsaData;
+                if ( WSAStartup( MAKEWORD( 2, 2 ), &wsaData ) != 0 ) throw std::runtime_error( "Can't init WinSock2" );
+
+            }
 
         #else
 
@@ -110,7 +69,9 @@ namespace sfap {
 
         #endif
 
-    }
+        inited = true;
 
+    }
+    
 
 }

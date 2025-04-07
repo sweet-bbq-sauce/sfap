@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <string>
+#include <string_view>
 
 
 namespace sfap {
@@ -21,7 +21,7 @@ namespace sfap {
         };
 
 
-        AddressType detect_address_type( const std::string& address ) noexcept;
+        AddressType detect_address_type( std::string_view address ) noexcept;
 
 
     }
