@@ -226,13 +226,13 @@ namespace sfap {
 
             void write( remotefile_t file, const char* data, qword_t size ) const;
 
-            qword_t tellg( remotefile_t file ) const;
-            void seekg( remotefile_t file, qword_t offset, std::ios::seekdir dir ) const;
-            void seekg( remotefile_t file, qword_t position ) const;
+            std::streampos tellg( remotefile_t file ) const;
+            void seekg( remotefile_t file, std::streamoff offset, std::ios::seekdir dir ) const;
+            void seekg( remotefile_t file, std::streampos position ) const;
 
-            qword_t tellp( remotefile_t file ) const;
-            void seekp( remotefile_t file, qword_t offset, std::ios::seekdir dir ) const;
-            void seekp( remotefile_t file, qword_t position ) const;
+            std::streampos tellp( remotefile_t file ) const;
+            void seekp( remotefile_t file, std::streamoff offset, std::ios::seekdir dir ) const;
+            void seekp( remotefile_t file, std::streampos position ) const;
 
             bool eof( remotefile_t file ) const;
             bool good( remotefile_t file ) const;
