@@ -24,21 +24,11 @@ int main() {
 
         client.login( { "fds", "Fdsf" } );
 
-        const auto id = client.open_file( "test.txt", std::ios::in | std::ios::out );
+        const auto info = client.space( "Projects/sfap/VERSION" );
 
-        std::cout << strbool( client.eof( id ) ) << std::endl;
-        std::cout << strbool( client.good( id ) ) << std::endl;
-        std::cout << client.gcount( id ) << std::endl;
-
-        char buf[256] = { 0 };
-
-        client.read( id, buf, sizeof(buf) );
-
-        std::cout << "received " << client.gcount( id ) << std::endl;
-        std::cout << "received " << client.gcount( id, false ) << std::endl;
-        std::cout << buf << std::endl;
-
-        client.close_file( id );
+        std::cout << info.available / 1024 << std::endl;
+        std::cout << info.capacity / 1024 << std::endl;
+        std::cout << info.free / 1024 << std::endl;
 
     }
     catch ( const std::exception& e ) {

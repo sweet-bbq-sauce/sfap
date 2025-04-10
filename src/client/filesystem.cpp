@@ -74,3 +74,22 @@ std::vector<EntryInfo> Client::ls( const path_t& directory, bool deep, bool hidd
     return buffer;
 
 }
+
+
+std::filesystem::space_info Client::space( const path_t& directory ) const {
+
+    _negotiate_command( CommandList::SPACE );
+
+    _sock.sends( directory.string() );
+
+    const auto result = _sock.recvo<FilesystemResult>();
+    if ( result != FilesystemResult::OK ) throw std::invalid_argument( "SPACE denied: " + std::to_string( static_cast<int>( result ) ) );
+
+    std::filesystem::space_info info;
+    info.available = _sock.recvo<qword_t>();
+    info.capacity = _sock.recvo<qword_t>();
+    info.free = _sock.recvo<qword_t>();
+
+    return info;
+
+}

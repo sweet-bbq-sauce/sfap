@@ -208,4 +208,40 @@ void Procedures::_fs_group() {
     });
 
 
+    Commands::add_command( CommandList::SPACE, "space", []( Session& session, const IOSocket& sock ) {
+
+        path_t wanted = sock.recvss();
+
+        try {
+
+            wanted = session.serverify( wanted );
+
+        }
+        catch ( const std::exception& e ) {
+
+            sock.sendo( FilesystemResult::NOT_ACCESSIBLE );
+
+            return;
+
+        }
+
+        if ( !std::filesystem::exists( wanted ) ) {
+
+            sock.sendo( FilesystemResult::NOT_EXISTS );
+
+            return;
+
+        }
+
+        sock.sendo( FilesystemResult::OK );
+
+        const auto info = std::filesystem::space( wanted );
+
+        sock.sendo( static_cast<qword_t>( info.available ) );
+        sock.sendo( static_cast<qword_t>( info.capacity ) );
+        sock.sendo( static_cast<qword_t>( info.free ) );
+
+    });
+
+
 }
