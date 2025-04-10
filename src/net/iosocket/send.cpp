@@ -36,7 +36,6 @@ void IOSocket::send( const void* data, qword_t size ) const {
             else if ( n == 0 ) throw std::runtime_error( "SSL_write failed: remote peer closed" );
 
         }
-
         else {
 
             n = ::send( _fd, static_cast<const char*>( data ) + sent, to_send, 0 );

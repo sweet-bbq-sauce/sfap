@@ -1,4 +1,5 @@
 #include <fstream>
+#include <memory>
 
 #include <server/procedures/procedures.hpp>
 #include <server/session/session.hpp>
@@ -27,15 +28,15 @@ void Procedures::_file_io_group() {
         }
         catch ( const std::exception& e ) {
 
-            sock.sendo( FileIOResult::CAN_NOT_OPEN_FILE );
+            sock.sendo( FilesystemResult::NOT_ACCESSIBLE );
 
             return;
 
         }
 
-        if ( std::filesystem::exists( wanted ) && std::filesystem::is_character_file( wanted ) ) {
+        if ( std::filesystem::exists( wanted ) && !std::filesystem::is_regular_file( wanted ) ) {
 
-            sock.sendo( FileIOResult::CAN_NOT_OPEN_FILE );
+            sock.sendo( FilesystemResult::IS_NOT_FILE );
 
             return;
 
@@ -45,7 +46,7 @@ void Procedures::_file_io_group() {
 
         if ( !file ) {
 
-            sock.sendo( FileIOResult::CAN_NOT_OPEN_FILE );
+            sock.sendo( FilesystemResult::OTHER );
 
             return;
 
@@ -57,7 +58,7 @@ void Procedures::_file_io_group() {
 
         session.files[id] = std::move( file );
 
-        sock.sendo( FileIOResult::OK );
+        sock.sendo( FilesystemResult::OK );
         sock.sendo( id );
         sock.sendo( eof );
         sock.sendo( good );
@@ -124,6 +125,132 @@ void Procedures::_file_io_group() {
             sock.sendo( FileIOResult::OK );
 
             sock.sendo( session.files[wanted].gcount() );
+
+        }
+
+    });
+
+
+    Commands::add_command( CommandList::READ, "read", []( Session& session, const IOSocket& sock ) {
+
+        const remotefile_t wanted = sock.recvo<remotefile_t>();
+
+        if ( session.files.find( wanted ) == session.files.end() ) sock.sendo( FileIOResult::ID_NOT_EXISTS );
+        else {
+
+            sock.sendo( FileIOResult::OK );
+
+            auto& file = session.files[wanted];
+
+            const qword_t to_read = sock.recvo<qword_t>();
+            const auto buffer = std::make_unique<char[]>( to_read );
+
+            session.files[wanted].read( buffer.get(), to_read );
+
+            sock.sendo( static_cast<qword_t>( file.gcount() ) );
+            sock.sendo( static_cast<bool>( file.eof() ) );
+            sock.sendo( static_cast<bool>( file.good() ) );
+
+            sock.send( buffer.get(), file.gcount() );
+
+        }
+
+    });
+
+
+    Commands::add_command( CommandList::WRITE, "write", []( Session& session, const IOSocket& sock ) {
+
+        const remotefile_t wanted = sock.recvo<remotefile_t>();
+
+        if ( session.files.find( wanted ) == session.files.end() ) sock.sendo( FileIOResult::ID_NOT_EXISTS );
+        else {
+
+            sock.sendo( FileIOResult::OK );
+
+            auto& file = session.files[wanted];
+
+            const qword_t to_write = sock.recvo<qword_t>();
+            const auto buffer = std::make_unique<char[]>( to_write );
+
+            sock.recv( buffer.get(), to_write );
+            file.write( buffer.get(), to_write );
+
+            sock.sendo( file.eof() );
+            sock.sendo( file.good() );
+
+        }
+
+    });
+
+
+    Commands::add_command( CommandList::TELLG, "tellg", []( Session& session, const IOSocket& sock ) {
+
+        const remotefile_t wanted = sock.recvo<remotefile_t>();
+
+        if ( session.files.find( wanted ) == session.files.end() ) sock.sendo( FileIOResult::ID_NOT_EXISTS );
+        else {
+
+            sock.sendo( FileIOResult::OK );
+
+            auto& file = session.files[wanted];
+
+            sock.sendo( static_cast<int64_t>( file.tellg() ) );
+
+        }
+
+    });
+
+
+    Commands::add_command( CommandList::SEEKG, "seekg", []( Session& session, const IOSocket& sock ) {
+
+        const remotefile_t wanted = sock.recvo<remotefile_t>();
+
+        if ( session.files.find( wanted ) == session.files.end() ) sock.sendo( FileIOResult::ID_NOT_EXISTS );
+        else {
+
+            sock.sendo( FileIOResult::OK );
+
+            auto& file = session.files[wanted];
+
+            if ( sock.recvo<bool>() ) file.seekg( static_cast<std::streamoff>( sock.recvo<int64_t>() ), static_cast<std::ios::seekdir>( sock.recvo<dword_t>() ) );
+            else file.seekg( static_cast<std::streampos>( sock.recvo<int64_t>() ) );
+
+        }
+
+    });
+
+
+    Commands::add_command( CommandList::TELLP, "tellp", []( Session& session, const IOSocket& sock ) {
+
+        const remotefile_t wanted = sock.recvo<remotefile_t>();
+
+        if ( session.files.find( wanted ) == session.files.end() ) sock.sendo( FileIOResult::ID_NOT_EXISTS );
+        else {
+
+            sock.sendo( FileIOResult::OK );
+
+            auto& file = session.files[wanted];
+
+            sock.sendo( static_cast<int64_t>( file.tellp() ) );
+
+        }
+
+    });
+
+
+    Commands::add_command( CommandList::SEEKP, "seekp", []( Session& session, const IOSocket& sock ) {
+
+        const remotefile_t wanted = sock.recvo<remotefile_t>();
+
+        if ( session.files.find( wanted ) == session.files.end() ) sock.sendo( FileIOResult::ID_NOT_EXISTS );
+        else {
+
+            sock.sendo( FileIOResult::OK );
+
+            auto& file = session.files[wanted];
+
+            if ( sock.recvo<bool>() ) file.seekp( static_cast<std::streamoff>( sock.recvo<int64_t>() ), static_cast<std::ios::seekdir>( sock.recvo<dword_t>() ) );
+            else file.seekp( static_cast<std::streampos>( sock.recvo<int64_t>() ) );
 
         }
 

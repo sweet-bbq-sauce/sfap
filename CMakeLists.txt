@@ -16,7 +16,7 @@ include_directories( "${CMAKE_SOURCE_DIR}/src" )
 
 set( SFAP_DNS_DEFAULT_RESOLVE_MODE 1 CACHE STRING "Set default mode for resolving DNS hostnames" )
 
-if(NOT SFAP_DNS_DEFAULT_RESOLVE_MODE MATCHES "^[0-9]+$")
+if(NOT SFAP_DNS_DEFAULT_RESOLVE_MODE MATCHES "^[1-3]+$")
     message(FATAL_ERROR "SFAP_DNS_DEFAULT_RESOLVE_MODE must be a number")
 endif()
 

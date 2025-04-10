@@ -37,7 +37,6 @@ void IOSocket::recv( void* data, qword_t size ) const {
             else if ( n == 0 ) throw std::runtime_error( "SSL_read failed: remote peer closed" );
 
         }
-
         else {
 
             n = ::recv( _fd, static_cast<char*>( data ) + received, to_receive, 0 );

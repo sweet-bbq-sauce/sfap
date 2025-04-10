@@ -113,7 +113,8 @@ namespace sfap {
             IS_NOT_FILE,
             NOT_ACCESSIBLE,
             NOT_EXISTS,
-            NOT_SUPPORTED
+            NOT_SUPPORTED,
+            OTHER
 
         };
 

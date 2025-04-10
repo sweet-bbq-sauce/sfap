@@ -19,7 +19,7 @@ int main() {
     const utils::Magic magic;
 
     const auto ssl = std::make_shared<crypto::SSLContext>( ( path_t )"../cert/key.pem", ( path_t )"../cert/cert.pem" );
-    Server server( net::Address( net::Host( "0.0.0.0:6767" ), ssl ) );
+    Server server( net::Address( "0.0.0.0:6767", ssl ) );
 
     server.set_magic_context( magic );
     

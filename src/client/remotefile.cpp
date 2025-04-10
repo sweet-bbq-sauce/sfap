@@ -12,8 +12,8 @@ remotefile_t Client::open_file( const path_t& file, std::ios::openmode mode ) co
     _sock.sends( file.string() );
     _sock.sendo( static_cast<dword_t>( mode ) );
 
-    const auto result = _sock.recvo<FileIOResult>();
-    if ( result != FileIOResult::OK ) throw std::invalid_argument( "server denied OPEN: " + std::to_string( static_cast<int>( result ) ) );
+    const auto result = _sock.recvo<FilesystemResult>();
+    if ( result != FilesystemResult::OK ) throw std::invalid_argument( "server denied OPEN: " + std::to_string( static_cast<int>( result ) ) );
 
     const remotefile_t id = _sock.recvo<bool>();
     _remotefile_row tmp;
@@ -41,7 +41,9 @@ void Client::close_file( remotefile_t file ) const {
 }
 
 
-bool Client::eof( remotefile_t file ) const {
+bool Client::eof( remotefile_t file, bool use_cache ) const {
+
+    if ( use_cache ) return _remotefile_cache[file].eof;
 
     _negotiate_command( CommandList::IS_EOF );
 
@@ -59,7 +61,9 @@ bool Client::eof( remotefile_t file ) const {
 }
 
 
-bool Client::good( remotefile_t file ) const {
+bool Client::good( remotefile_t file, bool use_cache ) const {
+
+    if ( use_cache ) return _remotefile_cache[file].good;
 
     _negotiate_command( CommandList::GOOD );
 
@@ -77,7 +81,9 @@ bool Client::good( remotefile_t file ) const {
 }
 
 
-qword_t Client::gcount( remotefile_t file ) const {
+qword_t Client::gcount( remotefile_t file, bool use_cache ) const {
+
+    if ( use_cache ) return _remotefile_cache[file].gcount;
 
     _negotiate_command( CommandList::GCOUNT );
 

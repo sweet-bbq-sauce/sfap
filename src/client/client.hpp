@@ -129,6 +129,8 @@ namespace sfap {
              */
             bool exists( const path_t& entry ) const;
 
+            std::filesystem::space_info space( const path_t& directory = "." ) const;
+
             /**
              * @brief Stwórz nowy plik.
              * @param new_file ścieżka nowego pliku.
@@ -222,7 +224,7 @@ namespace sfap {
             void close_file( remotefile_t file ) const;
 
             void read( remotefile_t file, char* data, qword_t size ) const;
-            qword_t gcount( remotefile_t file ) const;
+            qword_t gcount( remotefile_t file, bool use_cache = true ) const;
 
             void write( remotefile_t file, const char* data, qword_t size ) const;
 
@@ -234,8 +236,8 @@ namespace sfap {
             void seekp( remotefile_t file, std::streamoff offset, std::ios::seekdir dir ) const;
             void seekp( remotefile_t file, std::streampos position ) const;
 
-            bool eof( remotefile_t file ) const;
-            bool good( remotefile_t file ) const;
+            bool eof( remotefile_t file, bool use_cache = true ) const;
+            bool good( remotefile_t file, bool use_cache = true ) const;
 
             /**
              * @brief Otwórz zdalny plik w stylu std::fstream jako osobne połączenie.

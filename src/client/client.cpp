@@ -77,8 +77,8 @@ void Client::close() {
 
     _negotiate_command( CommandList::BYE );
 
-    utils::info( "Received: ", _sock.get_received_bytes(), " Bytes" );
-    utils::info( "Sent: ", _sock.get_sent_bytes(), " Bytes" );
+    //utils::info( "Received: ", _sock.get_received_bytes(), " Bytes" );
+    //utils::info( "Sent: ", _sock.get_sent_bytes(), " Bytes" );
 
 }
 
