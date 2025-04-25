@@ -73,3 +73,17 @@ if ( BUILD_DOCS )
     )
 
 endif()
+
+
+# Google Test support
+option( BUILD_TESTS "Build gtests" ON )
+
+if ( BUILD_TESTS )
+
+    find_package( GTest REQUIRED )
+
+    enable_testing()
+
+    add_subdirectory( "${CMAKE_SOURCE_DIR}/tests" )
+
+endif()
