@@ -40,23 +40,25 @@ add_subdirectory( "${CMAKE_SOURCE_DIR}/src" )
 
 
 # Doxygen support
-find_package( Doxygen REQUIRED )
+option( BUILD_DOCS "Build documentation with Doxygen" ON )
 
-set( DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/docs" )
-set( DOXYGEN_INPUT "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/README.md" )
-set( DOXYGEN_IMAGE_PATH "${CMAKE_SOURCE_DIR}/docs/assets" )
+if ( BUILD_DOCS )
 
-set( DOXYGEN_OUTPUT_LANGUAGE "English" CACHE STRING "Language used in Doxygen documentation" )
+    find_package( Doxygen REQUIRED )
 
-configure_file(
+    set( DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/docs" )
+    set( DOXYGEN_INPUT "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/README.md" )
+    set( DOXYGEN_IMAGE_PATH "${CMAKE_SOURCE_DIR}/docs/assets" )
 
-    "${CMAKE_SOURCE_DIR}/Doxyfile.in"
-    "${CMAKE_BINARY_DIR}/Doxyfile"
-    @ONLY
+    set( DOXYGEN_OUTPUT_LANGUAGE "English" CACHE STRING "Language used in Doxygen documentation" )
 
-)
+    configure_file(
 
-if ( DOXYGEN_FOUND )
+        "${CMAKE_SOURCE_DIR}/Doxyfile.in"
+        "${CMAKE_BINARY_DIR}/Doxyfile"
+        @ONLY
+
+    )
 
     set( DOXYGEN_CONFIG "${CMAKE_BINARY_DIR}/Doxyfile" )
 
