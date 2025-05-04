@@ -18,6 +18,31 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
 
+# Default resolve mode
+set( LIBSFAP_DEFAULT_RESOLVE_MODE "Prefer IPv6" CACHE STRING "Choose the default DNS mode: 'IPv4', 'IPv6', 'Prefer IPv6'" )
+set_property( CACHE LIBSFAP_DEFAULT_RESOLVE_MODE PROPERTY STRINGS "IPv4" "IPv6" "Prefer IPv6" )
+
+message( "Default resolve mode is: ${LIBSFAP_DEFAULT_RESOLVE_MODE}" )
+
+if( LIBSFAP_DEFAULT_RESOLVE_MODE STREQUAL "IPv4" )
+
+    set( LIBSFAP_DEFAULT_RESOLVE_MODE_ID 0 )
+
+elseif( LIBSFAP_DEFAULT_RESOLVE_MODE STREQUAL "IPv6" )
+
+    set( LIBSFAP_DEFAULT_RESOLVE_MODE_ID 1 )
+
+elseif( LIBSFAP_DEFAULT_RESOLVE_MODE STREQUAL "Prefer IPv6" )
+
+    set( LIBSFAP_DEFAULT_RESOLVE_MODE_ID 2 )
+
+else()
+
+    message( FATAL_ERROR "Invalid LIBSFAP_DEFAULT_RESOLVE_MODE. Allowed: IPv4, IPv6, Prefer IPv6" )
+
+endif()
+
+
 # Flush configuration to config.hpp
 configure_file(
 
@@ -40,7 +65,7 @@ add_subdirectory( "${CMAKE_SOURCE_DIR}/src" )
 
 
 # Doxygen support
-option( BUILD_DOCS "Build documentation with Doxygen" ON )
+option( BUILD_DOCS "Build documentation with Doxygen" OFF )
 
 if ( BUILD_DOCS )
 

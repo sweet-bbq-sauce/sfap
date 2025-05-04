@@ -36,6 +36,7 @@
 
 #include <filesystem>
 #include <vector>
+#include <iostream>
 
 #ifdef _WIN32
 

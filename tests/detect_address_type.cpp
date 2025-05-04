@@ -1,3 +1,9 @@
+#ifdef _WIN32
+
+    #include <winsock2.h>
+
+#endif
+
 #include <gtest/gtest.h>
 
 #include <net/address/detect.hpp>
@@ -5,6 +11,13 @@
 
 // Empty hostname
 TEST( Detect_Address_Type, Empty ) {
+
+    #ifdef _WIN32
+
+        WSADATA wsaData;
+        if ( WSAStartup( MAKEWORD( 2, 2 ), &wsaData ) != 0) FAIL() << "WSAStartup failed";
+
+    #endif
 
     EXPECT_EQ( (int)sfap::net::detect_address_type( "" ), (int)sfap::net::address_type::EMPTY );
 
@@ -94,6 +107,17 @@ TEST( Detect_Address_Type, ValidIPv4 ) {
 TEST( Detect_Address_Type, InvalidIPv4 ) {
 
     EXPECT_EQ( (int)sfap::net::detect_address_type( "127.00.00.0.0" ), (int)sfap::net::address_type::HOSTNAME );
+    EXPECT_EQ( (int)sfap::net::detect_address_type( ".127.0.0.0" ), (int)sfap::net::address_type::UNSUPPORTED );
+    EXPECT_EQ( (int)sfap::net::detect_address_type( "127.0.0.0." ), (int)sfap::net::address_type::UNSUPPORTED );
+    EXPECT_EQ( (int)sfap::net::detect_address_type( "127.33.43,34" ), (int)sfap::net::address_type::UNSUPPORTED );
+
+}
+
+
+// Invalid IPv6
+TEST( Detect_Address_Type, InvalidIPv6 ) {
+
+    EXPECT_EQ( (int)sfap::net::detect_address_type( "2001:4860:4860::8888" ), (int)sfap::net::address_type::IPV6 );
     EXPECT_EQ( (int)sfap::net::detect_address_type( ".127.0.0.0" ), (int)sfap::net::address_type::UNSUPPORTED );
     EXPECT_EQ( (int)sfap::net::detect_address_type( "127.0.0.0." ), (int)sfap::net::address_type::UNSUPPORTED );
     EXPECT_EQ( (int)sfap::net::detect_address_type( "127.33.43,34" ), (int)sfap::net::address_type::UNSUPPORTED );
