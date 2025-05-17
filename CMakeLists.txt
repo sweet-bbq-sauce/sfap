@@ -18,11 +18,15 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
 
+# Find dependecies
+find_package( OpenSSL REQUIRED )
+
+
 # Default resolve mode
 set( LIBSFAP_DEFAULT_RESOLVE_MODE "Prefer IPv6" CACHE STRING "Choose the default DNS mode: 'IPv4', 'IPv6', 'Prefer IPv6'" )
 set_property( CACHE LIBSFAP_DEFAULT_RESOLVE_MODE PROPERTY STRINGS "IPv4" "IPv6" "Prefer IPv6" )
 
-message( "Default resolve mode is: ${LIBSFAP_DEFAULT_RESOLVE_MODE}" )
+message( STATUS "Default resolve mode is: ${LIBSFAP_DEFAULT_RESOLVE_MODE}" )
 
 if( LIBSFAP_DEFAULT_RESOLVE_MODE STREQUAL "IPv4" )
 
