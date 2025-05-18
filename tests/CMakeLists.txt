@@ -40,3 +40,9 @@ add_test( NAME TLSContext COMMAND tlscontext )
 add_executable( encoding encoding.cpp )
 target_link_libraries( encoding sfap GTest::GTest GTest::Main )
 add_test( NAME Encoding COMMAND encoding )
+
+
+# Host
+add_executable( host host.cpp )
+target_link_libraries( host sfap GTest::GTest GTest::Main )
+add_test( NAME Host COMMAND host )
