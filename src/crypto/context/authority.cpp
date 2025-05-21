@@ -124,3 +124,16 @@ void TLSContext::add_ca_file_array( const std::vector<path_t>& ca_files ) {
     }
 
 }
+
+
+void TLSContext::add_system_ca() {
+
+    std::unique_lock lock( _modify_mutex );
+
+    if ( SSL_CTX_set_default_verify_paths( _ctx.get() ) != 1 ) {
+
+        throw OpenSSLError( "can't add system CAs (SSL_CTX_set_default_verify_paths)" );
+
+    }
+
+}

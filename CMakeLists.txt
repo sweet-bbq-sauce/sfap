@@ -23,7 +23,7 @@ find_package( OpenSSL REQUIRED )
 
 
 # Default resolve mode
-set( LIBSFAP_DEFAULT_RESOLVE_MODE "Prefer IPv6" CACHE STRING "Choose the default DNS mode: 'IPv4', 'IPv6', 'Prefer IPv6'" )
+set( LIBSFAP_DEFAULT_RESOLVE_MODE "IPv4" CACHE STRING "Choose the default DNS mode: 'IPv4', 'IPv6', 'Prefer IPv6'" )
 set_property( CACHE LIBSFAP_DEFAULT_RESOLVE_MODE PROPERTY STRINGS "IPv4" "IPv6" "Prefer IPv6" )
 
 message( STATUS "Default resolve mode is: ${LIBSFAP_DEFAULT_RESOLVE_MODE}" )

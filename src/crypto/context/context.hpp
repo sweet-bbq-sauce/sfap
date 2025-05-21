@@ -70,7 +70,7 @@ namespace sfap {
                  *  \brief Constructs a TLSContext with a given verification mode.
                  *  \param verify_mode OpenSSL verification mode (e.g., `SSL_VERIFY_NONE`).
                  */
-                explicit TLSContext( int verify_mode = SSL_VERIFY_NONE );
+                explicit TLSContext( int verify_mode = SSL_VERIFY_NONE, bool system_ca = true );
                 ~TLSContext();
 
                 TLSContext( const TLSContext& ) = delete;
@@ -186,6 +186,8 @@ namespace sfap {
                  */
                 void add_ca_file_array( const std::vector<path_t>& ca );
 
+                void add_system_ca();
+
                 /*!
                  *  \brief Gets the underlying SSL_CTX pointer.
                  *  \return Raw SSL_CTX pointer.
@@ -203,6 +205,9 @@ namespace sfap {
                  *  \return Unique pointer to the SSL object.
                  */
                 ssl_ptr operator()() const;
+
+
+                static const TLSContext default_client_context;
 
 
             private:

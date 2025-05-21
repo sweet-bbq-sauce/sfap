@@ -46,3 +46,9 @@ add_test( NAME Encoding COMMAND encoding )
 add_executable( host host.cpp )
 target_link_libraries( host sfap GTest::GTest GTest::Main )
 add_test( NAME Host COMMAND host )
+
+
+# IOSocket
+add_executable( iosocket iosocket.cpp )
+target_link_libraries( iosocket sfap GTest::GTest GTest::Main )
+add_test( NAME IOSocket COMMAND iosocket )

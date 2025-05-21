@@ -42,7 +42,7 @@ using namespace sfap;
 using namespace sfap::crypto;
 
 
-TLSContext::TLSContext( int mode ) :
+TLSContext::TLSContext( int mode, bool system_ca ) :
     _ctx( SSL_CTX_new( TLS_method() ), &SSL_CTX_free )
 {
 
@@ -52,7 +52,15 @@ TLSContext::TLSContext( int mode ) :
 
     }
 
+    set_min_proto_version( TLS1_3_VERSION );
+
     set_verify_mode( mode );
+
+    if ( system_ca ) {
+
+        add_system_ca();
+
+    }
 
 }
 
@@ -222,3 +230,4 @@ int TLSContext::_verify_callback( int preverify_ok, X509_STORE_CTX* store_ctx ) 
 
 std::map<const SSL_CTX*, std::function<int( int, X509_STORE_CTX* )>> TLSContext::_callbacks;
 std::shared_mutex TLSContext::_callbacks_mutex;
+const TLSContext TLSContext::default_client_context( SSL_VERIFY_PEER );

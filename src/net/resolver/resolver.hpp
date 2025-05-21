@@ -112,7 +112,7 @@ namespace sfap {
 
                 #endif
 
-                static const Mode default_mode = static_cast<Mode>( LIBSFAP_DEFAULT_RESOLVE_MODE_ID );      //!< Default resolve mode defined by LIBSFAP_DEFAULT_RESOLVE_MODE_ID macro.
+                static constexpr Mode default_mode = static_cast<Mode>( LIBSFAP_DEFAULT_RESOLVE_MODE_ID );      //!< Default resolve mode defined by LIBSFAP_DEFAULT_RESOLVE_MODE_ID macro.
 
                 /*!
                  *  \brief Constructs a Resolver for the given hostname.
