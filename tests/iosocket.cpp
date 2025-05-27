@@ -32,7 +32,7 @@ TEST( IOSocket, SimpleHTTP ) {
     #endif
 
     sockaddr_storage address;
-    EXPECT_NO_THROW( address = Host( "api.ipify.org", 80 ).to_native() );
+    EXPECT_NO_THROW( address = Host( "api.ipify.org:80" ).to_native() );
 
     socket_t fd = socket( address.ss_family, SOCK_STREAM, IPPROTO_TCP );
     EXPECT_FALSE( fd == INVALID_SOCKET );
@@ -82,7 +82,7 @@ TEST( IOSocket, SimpleHTTP ) {
 TEST( IOSocket, SimpleHTTPS ) {
 
     sockaddr_storage address;
-    EXPECT_NO_THROW( address = Host( "api.ipify.org", 443 ).to_native() );
+    EXPECT_NO_THROW( address = Host( "api.ipify.org:443" ).to_native() );
 
     socket_t fd = socket( address.ss_family, SOCK_STREAM, IPPROTO_TCP );
     EXPECT_FALSE( fd == INVALID_SOCKET );

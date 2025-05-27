@@ -138,6 +138,13 @@ bool IOSocket::recvb() const {
 }
 
 
+byte_t IOSocket::recvc() const {
+
+    return recvo<byte_t>();
+
+}
+
+
 void IOSocket::recvd( data_t& data ) const {
 
     const dword_t size = recvo<dword_t>();

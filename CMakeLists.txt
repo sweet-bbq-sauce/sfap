@@ -110,8 +110,18 @@ option( BUILD_TESTS "Build gtests" ON )
 if ( BUILD_TESTS )
 
     find_package( GTest REQUIRED )
+    find_package( Python3 REQUIRED COMPONENTS Interpreter )
 
     enable_testing()
+
+    # Flush test configuration to tests.hpp
+    configure_file(
+
+        "${CMAKE_SOURCE_DIR}/tests/tests.hpp.in"
+        "${CMAKE_BINARY_DIR}/tests/tests.hpp"
+        @ONLY
+
+    )
 
     add_subdirectory( "${CMAKE_SOURCE_DIR}/tests" )
 

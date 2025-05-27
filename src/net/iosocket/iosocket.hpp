@@ -126,13 +126,13 @@ namespace sfap {
                  *  \brief Returns the total number of bytes sent through this socket.
                  *  \return Number of bytes sent.
                  */
-                qword_t get_sent_bytes_count() noexcept;
+                qword_t get_sent_bytes_count() const noexcept;
 
                 /*!
                  *  \brief Returns the total number of bytes received through this socket.
                  *  \return Number of bytes received.
                  */
-                qword_t get_received_bytes_count() noexcept;
+                qword_t get_received_bytes_count() const noexcept;
 
                 /*!
                  *  \brief Returns the underlying socket descriptor.
@@ -173,6 +173,14 @@ namespace sfap {
                  *  \note Do not use sendo() for bool, as bool size and representation may vary between systems.
                  */
                 void sendb( bool value ) const;
+
+                /*!
+                 *  \brief Sends a byte value over the socket.
+                 *
+                 *  It's wrapper around `sendo<byte_t>()`.
+                 *  \param value Byte to send.
+                 */
+                void sendc( byte_t value ) const;
 
                 /*!
                  *  \brief Sends data prefixed with its size (4-byte length prefix).
@@ -226,6 +234,14 @@ namespace sfap {
                  *  \return Received boolean value.
                  */
                 bool recvb() const;
+
+                /*!
+                 *  \brief Receives a byte value from the socket.
+                 *
+                 *  It's wrapper around `recvo<byte_t>()`.
+                 *  \return Received byte.
+                 */
+                byte_t recvc() const;
 
                 /*!
                  *  \brief Receives data into a data_t object.

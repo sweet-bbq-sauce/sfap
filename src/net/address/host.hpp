@@ -155,7 +155,7 @@ namespace sfap {
                  *
                  *  \return The stored hostname string.
                  */
-                std::string get_hostname() const noexcept;
+                const std::string& get_hostname() const noexcept;
 
                 /*!
                  *  \brief Sets the port number.
@@ -226,6 +226,13 @@ namespace sfap {
                  *  \return True if the host is connectable.
                  */
                 bool is_connectable() const noexcept;
+
+                /*!
+                 *  \brief Returns Host hostname type.
+                 *
+                 *  \return Address type.
+                 */
+                address_type get_type() const noexcept;
 
 
             private:

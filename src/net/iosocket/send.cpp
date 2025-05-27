@@ -137,6 +137,13 @@ void IOSocket::sendb( bool value ) const {
 }
 
 
+void IOSocket::sendc( byte_t value ) const {
+
+    sendo( value );
+
+}
+
+
 void IOSocket::sendh( const void* data, dword_t size ) const {
 
     sendo( size );

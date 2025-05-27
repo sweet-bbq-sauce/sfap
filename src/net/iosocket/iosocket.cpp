@@ -175,14 +175,14 @@ bool IOSocket::is_secure() const noexcept {
 }
 
 
-qword_t IOSocket::get_sent_bytes_count() noexcept {
+qword_t IOSocket::get_sent_bytes_count() const noexcept {
 
     return _sent_bytes;
 
 }
 
 
-qword_t IOSocket::get_received_bytes_count() noexcept {
+qword_t IOSocket::get_received_bytes_count() const noexcept {
 
     return _received_bytes;
 

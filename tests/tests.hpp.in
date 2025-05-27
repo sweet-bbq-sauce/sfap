@@ -1,0 +1,5 @@
+#pragma once
+
+
+#define SFAP_SOURCE_DIR "@CMAKE_SOURCE_DIR@"
+

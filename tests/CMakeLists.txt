@@ -52,3 +52,15 @@ add_test( NAME Host COMMAND host )
 add_executable( iosocket iosocket.cpp )
 target_link_libraries( iosocket sfap GTest::GTest GTest::Main )
 add_test( NAME IOSocket COMMAND iosocket )
+
+
+# Socks5 proxy
+add_executable( socks5_proxy socks5_proxy.cpp )
+target_link_libraries( socks5_proxy sfap GTest::GTest GTest::Main )
+add_test( NAME Socks5 COMMAND socks5_proxy )
+
+
+# HTTP proxy
+add_executable( http_proxy http_proxy.cpp )
+target_link_libraries( http_proxy sfap GTest::GTest GTest::Main )
+add_test( NAME Http_Proxy COMMAND http_proxy )

@@ -194,7 +194,7 @@ void Host::set_hostname( const std::string& hostname ) {
 }
 
 
-std::string Host::get_hostname() const noexcept {
+const std::string& Host::get_hostname() const noexcept {
 
     return _hostname;
 
@@ -371,5 +371,12 @@ sockaddr_storage Host::to_native() const {
     }
 
     return buffer;
+
+}
+
+
+address_type Host::get_type() const noexcept {
+
+    return _type;
 
 }
