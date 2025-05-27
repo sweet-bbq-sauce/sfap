@@ -94,6 +94,8 @@ namespace sfap {
                 
                 ) const;
 
+                const Host& get_host() const noexcept;
+
 
             private:
 

@@ -1,6 +1,6 @@
 /*!
  *  \file
- *  \brief Source file containing Proxy class definitions.
+ *  \brief Header file containing connect function declaration.
  *
  *  \copyright Copyright (c) 2025 Wiktor Sołtys
  *
@@ -28,60 +28,31 @@
  */
 
 
-#include <optional>
-#include <string>
+#pragma once
 
-#include <net/address/host.hpp>
+
+#include <net/address/address.hpp>
 #include <net/iosocket/iosocket.hpp>
-#include <net/proxy/proxy.hpp>
-#include <utils/credentials.hpp>
 
 
-using namespace sfap;
-using namespace sfap::net;
+namespace sfap {
+
+    namespace net {
 
 
-Proxy::Proxy(
-                    
-    proxy_type type,
-    const Host& host,
-    const std::optional<std::reference_wrapper<const utils::Credentials>>& credentials
-                
-) noexcept :
-    _type( type ),
-    _host( host ),
-    _credentials( credentials )
-{}
+        /*! 
+         *  \brief Establishes a connection to a given Address.
+         *
+         *  This function handles connection setup including optional
+         *  proxy chaining and TLS handshake.
+         *
+         *  \param address Destination address including proxy list and TLS context.
+         *  \return Connected IOSocket instance (possibly SSL-wrapped).
+         *  \throws std::runtime_error, std::system_error, crypto::OpenSSLError
+         */
+        [[nodiscard]] IOSocket connect( const Address& address );
 
-
-void Proxy::open(
-    
-    const Host& target,
-    const IOSocket& sock
-
-) const {
-
-    switch ( _type ) {
-
-        case proxy_type::HTTP_CONNECT:
-            _open_http_connect( target, sock );
-            break;
-
-        case proxy_type::SOCKS5:
-            _open_socks5( target, sock );
-            break;
-
-
-        default:
-            throw std::logic_error( "unknown proxy type" );
 
     }
-
-}
-
-
-const Host& Proxy::get_host() const noexcept {
-
-    return _host;
 
 }

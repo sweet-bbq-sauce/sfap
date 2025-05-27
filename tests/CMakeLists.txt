@@ -70,3 +70,9 @@ add_test( NAME Http_Proxy COMMAND http_proxy )
 add_executable( address address.cpp )
 target_link_libraries( address sfap GTest::GTest GTest::Main )
 add_test( NAME Address COMMAND address )
+
+
+# Connect
+add_executable( connect connect.cpp )
+target_link_libraries( connect sfap GTest::GTest GTest::Main )
+add_test( NAME Connect COMMAND connect )
