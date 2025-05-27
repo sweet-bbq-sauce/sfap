@@ -64,3 +64,9 @@ add_test( NAME Socks5 COMMAND socks5_proxy )
 add_executable( http_proxy http_proxy.cpp )
 target_link_libraries( http_proxy sfap GTest::GTest GTest::Main )
 add_test( NAME Http_Proxy COMMAND http_proxy )
+
+
+# Address
+add_executable( address address.cpp )
+target_link_libraries( address sfap GTest::GTest GTest::Main )
+add_test( NAME Address COMMAND address )
