@@ -76,3 +76,9 @@ add_test( NAME Address COMMAND address )
 add_executable( connect connect.cpp )
 target_link_libraries( connect sfap GTest::GTest GTest::Main )
 add_test( NAME Connect COMMAND connect )
+
+
+# Listener
+add_executable( listener listener.cpp )
+target_link_libraries( listener sfap GTest::GTest GTest::Main )
+add_test( NAME Listener COMMAND listener )

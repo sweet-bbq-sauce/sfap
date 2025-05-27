@@ -62,7 +62,7 @@ IOSocket net::connect( const Address& address ) {
 
     if ( !sock ) {
 
-        throw std::runtime_error( "can't create socket (::socket)" );
+        throw std::system_error( errno, std::generic_category(), "(::socket)" );
 
     }
 
