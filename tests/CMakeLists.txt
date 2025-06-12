@@ -82,3 +82,9 @@ add_test( NAME Connect COMMAND connect )
 add_executable( listener listener.cpp )
 target_link_libraries( listener sfap GTest::GTest GTest::Main )
 add_test( NAME Listener COMMAND listener )
+
+
+# Server
+add_executable( server server.cpp )
+target_link_libraries( server sfap GTest::GTest GTest::Main )
+add_test( NAME Server COMMAND server )

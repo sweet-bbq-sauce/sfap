@@ -177,7 +177,7 @@ void Proxy::_authenticate_socks5( const IOSocket& sock ) const {
 
         }
 
-        const auto& credentials = _credentials.value().get();
+        const auto& credentials = *_credentials.get();
         const std::string_view user = credentials.get_user();
         const std::string_view password = credentials.get_password();
 

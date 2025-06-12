@@ -77,7 +77,7 @@ namespace sfap {
                     
                     proxy_type type,
                     const Host& host,
-                    const std::optional<std::reference_wrapper<const utils::Credentials>>& credentials = std::nullopt
+                    std::shared_ptr<const utils::Credentials> credentials = nullptr
                 
                 ) noexcept;
 
@@ -128,7 +128,7 @@ namespace sfap {
 
                 proxy_type _type;       ///< Proxy type
                 Host _host;             ///< Proxy server host
-                std::optional<std::reference_wrapper<const utils::Credentials>> _credentials;   ///< Optional credentials
+                std::shared_ptr<const utils::Credentials> _credentials;     ///< Optional credentials
 
         };
 

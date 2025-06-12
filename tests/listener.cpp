@@ -67,11 +67,11 @@ TEST( Listener, SSLAcceptAndResponds ) {
 
     const std::string key = "sfap";
 
-    crypto::TLSContext server_context( SSL_VERIFY_NONE );
-    crypto::TLSContext client_context( SSL_VERIFY_NONE );
+    auto server_context = std::make_shared<crypto::TLSContext>( SSL_VERIFY_NONE );
+    auto client_context = std::make_shared<crypto::TLSContext>( SSL_VERIFY_NONE );
 
-    server_context.load_cert_file( cert_encrypted_file );
-    server_context.load_key_file( key_encrypted_file, key );
+    server_context->load_cert_file( cert_encrypted_file );
+    server_context->load_key_file( key_encrypted_file, key );
 
     const Address server_address( Host( "127.0.0.1:0" ), server_context );
     const Listener listener( server_address );

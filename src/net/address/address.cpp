@@ -41,24 +41,7 @@ using namespace sfap;
 using namespace sfap::net;
 
 
-Address::Address( const Host& target ) noexcept :
-    _target( target )
-{}
-
-
-Address::Address( const Host& target, const std::vector<Proxy>& proxies ) noexcept :
-    _target( target ),
-    _proxies( proxies )
-{}
-
-
-Address::Address( const Host& target, const crypto::TLSContext& ssl_context ) noexcept :
-    _target( target ),
-    _ssl_context( ssl_context )
-{}
-
-
-Address::Address( const Host& target, const crypto::TLSContext& ssl_context, const std::vector<Proxy>& proxies ) noexcept :
+Address::Address( const Host& target, std::shared_ptr<const crypto::TLSContext> ssl_context, const std::vector<Proxy>& proxies ) noexcept :
     _target( target ),
     _ssl_context( ssl_context ),
     _proxies( proxies )
@@ -72,7 +55,7 @@ void Address::set_target( const Host& target ) noexcept {
 }
 
 
-void Address::set_ssl_context( const crypto::TLSContext& ssl_context ) noexcept {
+void Address::set_ssl_context( std::shared_ptr<const crypto::TLSContext> ssl_context ) noexcept {
 
     _ssl_context = ssl_context;
 
@@ -100,7 +83,7 @@ const Host& Address::get_target() const noexcept {
 }
 
 
-const std::optional<std::reference_wrapper<const crypto::TLSContext>> Address::get_ssl_context() const noexcept {
+std::shared_ptr<const crypto::TLSContext> Address::get_ssl_context() const noexcept {
 
     return _ssl_context;
 
@@ -116,7 +99,7 @@ const std::vector<Proxy>& Address::get_proxies() const noexcept {
 
 bool Address::has_ssl_context() const noexcept {
 
-    return _ssl_context.has_value();
+    return _ssl_context.operator bool();
 
 }
 

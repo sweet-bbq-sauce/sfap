@@ -49,7 +49,7 @@ TEST( Http_Proxy, SimpleConnect ) {
 
     const Host target( "api.ipify.org:80" );
     const IOSocket sock( fd );
-    const utils::Credentials cred( "sfap", "isthebest" );
+    auto cred = std::make_shared<const utils::Credentials>( "sfap", "isthebest" );
 
     Proxy proxy( proxy_type::HTTP_CONNECT, target, cred );
 

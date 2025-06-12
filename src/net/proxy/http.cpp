@@ -63,7 +63,7 @@ void Proxy::_open_http_connect( const Host& target, const IOSocket& sock ) const
         BIO_set_flags( b64, BIO_FLAGS_BASE64_NO_NL );
         bio = BIO_push( b64, bio );
 
-        const auto& credentials = _credentials.value().get();
+        const auto& credentials = *_credentials.get();
         const std::string_view user = credentials.get_user();
         const std::string_view password = credentials.get_password();
 

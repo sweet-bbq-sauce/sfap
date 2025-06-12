@@ -207,7 +207,7 @@ namespace sfap {
                 ssl_ptr operator()() const;
 
 
-                static const TLSContext default_client_context;
+                static std::shared_ptr<const TLSContext> default_client_context;
 
 
             private:

@@ -1,6 +1,6 @@
 /*!
  *  \file
- *  \brief Source file containing Credentials class definitions.
+ *  \brief Source file containing default middlewares definitions.
  *
  *  \copyright Copyright (c) 2025 Wiktor Sołtys
  *
@@ -28,79 +28,40 @@
  */
 
 
-#include <string>
-#include <cstring>
+#include <iostream>
+#include <mutex>
 
+#include <server/server.hpp>
 #include <utils/credentials.hpp>
 
 
+using namespace sfap;
+using namespace sfap::protocol;
 using namespace sfap::utils;
 
 
-void secure_zero_string( std::string& str ) noexcept {
-
-    if ( !str.empty() ) {
-
-        volatile char* p = reinterpret_cast<volatile char*>( str.data() );
-        std::size_t len = str.size();
-
-        while ( len-- ) {
-
-            *p++ = 0;
-
-        }
-
-    }
-
-}
+std::mutex _cout_mutex;
 
 
-Credentials::Credentials( const std::string& user, const std::string& password ) noexcept {
+const Server::AuthMiddleware Server::default_authorize_middleware = []( const Credentials& credentials, std::string& username ) -> AuthResult {
 
-    set( user, password );
+    username = credentials.get_user();
 
-}
+    std::lock_guard lock( _cout_mutex );
 
+    std::cout << "User '" << username << "' authorized." << std::endl;
 
-Credentials::~Credentials() noexcept {
+    return AuthResult::OK;
 
-    secure_zero_string( _user );
-    secure_zero_string( _password );
-
-}
+};
 
 
-void Credentials::set( const std::string& user, const std::string& password ) noexcept {
+const Server::CommandMiddleware Server::default_command_middleware = []( word_t id, const std::optional<std::string>& user ) -> CommandResult {
 
-    set_user( user );
-    set_password( password );
+    std::lock_guard lock( _cout_mutex );
+    
+    std::cout << ( user ? ( "User '" + user.value() + "'" ) : "Anonymous user" ) << " requested command: " << id << std::endl;
 
-}
+    return ( user ) ? CommandResult::OK : CommandResult::ACCESS_DENIED;
 
-
-void Credentials::set_user( const std::string& user ) noexcept {
-
-    _user = user;
-
-}
-
-
-void Credentials::set_password( const std::string& password ) noexcept {
-
-    _password = password;
-
-}
-
-
-const std::string& Credentials::get_user() const noexcept {
-
-    return _user;
-
-}
-
-
-const std::string& Credentials::get_password() const noexcept {
-
-    return _password;
-
-}
+};

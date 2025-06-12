@@ -59,6 +59,11 @@ namespace sfap {
 
             public:
 
+                Listener(const Listener&) = delete;
+                Listener& operator=(const Listener&) = delete;
+                Listener(Listener&&) = delete;
+                Listener& operator=(Listener&&) = delete;
+
                 /*!
                  *  \brief Constructs a listener bound to the specified address.
                  *
@@ -128,7 +133,7 @@ namespace sfap {
             private:
 
                 socket_t _fd;
-                std::optional<std::reference_wrapper<const crypto::TLSContext>> _ssl_context;
+                std::shared_ptr<const crypto::TLSContext> _ssl_context;
 
         };
 

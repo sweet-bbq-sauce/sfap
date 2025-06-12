@@ -97,8 +97,8 @@ IOSocket net::connect( const Address& address ) {
 
     if ( address.has_ssl_context() ) {
 
-        const auto& ssl_context = address.get_ssl_context()->get();
-        auto ssl = ssl_context.create_ssl();
+        const auto& ssl_context = address.get_ssl_context();
+        auto ssl = ssl_context->create_ssl();
 
         if ( SSL_set_fd( ssl.get(), sock.get_socket() ) != 1 ) {
 

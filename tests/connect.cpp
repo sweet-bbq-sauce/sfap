@@ -19,7 +19,7 @@ TEST( Connect, SimpleConnect ) {
     #endif
 
     const Host target( "api.ipify.org:443" );
-    const utils::Credentials credentials( "sfap", "isthebest" );
+    auto credentials = std::make_shared<const utils::Credentials>( "sfap", "isthebest" );
     const Address address(
 
         target,

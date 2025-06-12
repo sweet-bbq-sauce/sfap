@@ -94,7 +94,7 @@ TEST( IOSocket, SimpleHTTPS ) {
 
     }
 
-    crypto::ssl_ptr ssl( SSL_new( crypto::TLSContext::default_client_context.get() ), &SSL_free );
+    crypto::ssl_ptr ssl( SSL_new( crypto::TLSContext::default_client_context->get() ), &SSL_free );
     EXPECT_TRUE( ssl != nullptr );
 
     

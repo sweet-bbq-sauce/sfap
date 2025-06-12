@@ -230,4 +230,4 @@ int TLSContext::_verify_callback( int preverify_ok, X509_STORE_CTX* store_ctx ) 
 
 std::map<const SSL_CTX*, std::function<int( int, X509_STORE_CTX* )>> TLSContext::_callbacks;
 std::shared_mutex TLSContext::_callbacks_mutex;
-const TLSContext TLSContext::default_client_context( SSL_VERIFY_PEER );
+std::shared_ptr<const TLSContext> TLSContext::default_client_context = std::make_shared<const TLSContext>( SSL_VERIFY_PEER );

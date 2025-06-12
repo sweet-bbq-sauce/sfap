@@ -31,6 +31,7 @@
 #pragma once
 
 
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -56,32 +57,12 @@ namespace sfap {
             public:
 
                 /*!
-                 *  \brief Constructs an Address with a target host and no SSL or proxies.
-                 *  \param target Target host.
-                 */
-                explicit Address( const Host& target ) noexcept;
-
-                /*!
-                 *  \brief Constructs an Address with a target host and a list of proxies.
-                 *  \param target Target host.
-                 *  \param proxies List of proxies to use.
-                 */
-                explicit Address( const Host& target, const std::vector<Proxy>& proxies ) noexcept;
-
-                /*!
-                 *  \brief Constructs an Address with a target host and an SSL context.
-                 *  \param target Target host.
-                 *  \param ssl_context TLS context reference.
-                 */
-                explicit Address( const Host& target, const crypto::TLSContext& ssl_context ) noexcept;
-
-                /*!
                  *  \brief Constructs an Address with a target host, SSL context, and a list of proxies.
                  *  \param target Target host.
                  *  \param ssl_context TLS context reference.
                  *  \param proxies List of proxies to use.
                  */
-                explicit Address( const Host& target, const crypto::TLSContext& ssl_context, const std::vector<Proxy>& proxies ) noexcept;
+                explicit Address( const Host& target, std::shared_ptr<const crypto::TLSContext> ssl_context = nullptr, const std::vector<Proxy>& proxies = {} ) noexcept;
 
                 /*!
                  *  \brief Sets the target host.
@@ -93,7 +74,7 @@ namespace sfap {
                  *  \brief Sets the SSL context.
                  *  \param ssl_context TLS context to use.
                  */
-                void set_ssl_context( const crypto::TLSContext& ssl_context ) noexcept;
+                void set_ssl_context( std::shared_ptr<const crypto::TLSContext> ssl_context ) noexcept;
 
                 /*!
                  *  \brief Replaces the proxy list.
@@ -117,7 +98,7 @@ namespace sfap {
                  *  \brief Gets the SSL context if set.
                  *  \return Optional reference to the TLS context.
                  */
-                const std::optional<std::reference_wrapper<const crypto::TLSContext>> get_ssl_context() const noexcept;
+                std::shared_ptr<const crypto::TLSContext> get_ssl_context() const noexcept;
 
                 /*!
                  *  \brief Gets the proxy list.
@@ -137,11 +118,13 @@ namespace sfap {
                  */
                 bool has_proxy() const noexcept;
 
+
             private:
 
                 Host _target;
-                std::optional<std::reference_wrapper<const crypto::TLSContext>> _ssl_context;
+                std::shared_ptr<const crypto::TLSContext> _ssl_context;
                 std::vector<Proxy> _proxies;
+
         };
 
 

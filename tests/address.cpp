@@ -29,7 +29,7 @@ TEST( Address, ConstructorWithProxies ) {
     const Proxy proxy( proxy_type::HTTP_CONNECT, proxy_host );
 
     const std::vector<Proxy> proxies = { proxy };
-    Address address( host, proxies );
+    Address address( host, nullptr, proxies );
 
     EXPECT_EQ(address.get_target().get_hostname(), "target.com");
     EXPECT_TRUE(address.has_proxy());
@@ -41,7 +41,7 @@ TEST( Address, ConstructorWithProxies ) {
 TEST( Address, ConstructorWithSSL ) {
 
     const Host host( "secure.com:443" );
-    const crypto::TLSContext ctx;
+    auto ctx = std::make_shared<const crypto::TLSContext>();
     const Address address( host, ctx );
 
     EXPECT_EQ( address.get_target().get_hostname(), "secure.com" );
@@ -70,7 +70,7 @@ TEST( Address, FullConstructor ) {
     const Proxy proxy( proxy_type::SOCKS5, proxy_host );
     const std::vector<Proxy> proxies = { proxy };
 
-    const crypto::TLSContext ctx;
+    auto ctx = std::make_shared<crypto::TLSContext>();
     const Address address( host, ctx, proxies );
 
     EXPECT_EQ( address.get_target().get_hostname(), "secureproxy.com" );

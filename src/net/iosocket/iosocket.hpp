@@ -69,7 +69,7 @@ namespace sfap {
                 */
                 IOSocket(
 
-                    socket_t fd,
+                    socket_t fd = INVALID_SOCKET,
                     crypto::ssl_ptr ssl = { nullptr, &SSL_free }
                     
                 );
@@ -166,6 +166,15 @@ namespace sfap {
 
                 }
 
+                template<typename E>
+                void sende( E e ) const {
+
+                    static_assert( std::is_enum_v<E>, "sende: E must be an enum type" );
+
+                    sendo( static_cast<std::underlying_type_t<E>>( e ) );
+
+                }
+
                 /*!
                  *  \brief Sends a boolean value over the socket.
                  *  \param value Boolean value to send.
@@ -173,6 +182,8 @@ namespace sfap {
                  *  \note Do not use sendo() for bool, as bool size and representation may vary between systems.
                  */
                 void sendb( bool value ) const;
+
+
 
                 /*!
                  *  \brief Sends a byte value over the socket.
@@ -226,6 +237,15 @@ namespace sfap {
                     recv( &object, sizeof( object ) );
 
                     return utils::ntoh( object );
+
+                }
+
+                template<typename E>
+                E recve() const {
+
+                    static_assert( std::is_enum_v<E>, "sende: E must be an enum type" );
+
+                    return static_cast<E>( recvo<std::underlying_type_t<E>>() );
 
                 }
 

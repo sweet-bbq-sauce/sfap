@@ -4,7 +4,7 @@ cmake_minimum_required( VERSION 3.10 )
 project(
 
     sfap
-    VERSION 0.1.0
+    VERSION 0.2.0
     LANGUAGES CXX
     DESCRIPTION "A modern alternative to FTP/SFTP in C++ with middleware, security layers, and remote file I/O."
     HOMEPAGE_URL "https://github.com/sweet-bbq-sauce/sfap"

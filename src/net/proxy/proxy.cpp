@@ -45,7 +45,7 @@ Proxy::Proxy(
                     
     proxy_type type,
     const Host& host,
-    const std::optional<std::reference_wrapper<const utils::Credentials>>& credentials
+    std::shared_ptr<const utils::Credentials> credentials
                 
 ) noexcept :
     _type( type ),

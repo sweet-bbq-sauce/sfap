@@ -66,6 +66,18 @@ Listener::Listener( const Address& address ) :
 
     }
 
+    int opt = 1;
+
+    #ifdef _WIN32
+
+        setsockopt( _fd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>( &opt ), sizeof( opt ) );
+
+    #else
+
+        setsockopt( _fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof( opt ) );
+
+    #endif
+
     if ( bind( _fd, reinterpret_cast<const sockaddr*>( &native_address ), sizeof( native_address ) ) != 0 ) {
 
         throw std::system_error( errno, std::generic_category(), "(::bind)" );
@@ -92,6 +104,16 @@ void Listener::close() noexcept {
 
     if ( is_open() ) {
 
+        #ifdef _WIN32
+
+            shutdown( _fd, SD_BOTH  );
+
+        #else
+
+            shutdown( _fd, SHUT_RDWR );
+
+        #endif
+
         closesocket( _fd );
 
         _fd = INVALID_SOCKET;
@@ -117,7 +139,7 @@ Listener::operator bool() const noexcept {
 
 bool Listener::is_secure() const noexcept {
 
-    return _ssl_context.has_value();
+    return _ssl_context.operator bool();
 
 }
 
@@ -148,8 +170,8 @@ IOSocket Listener::accept( std::optional<std::reference_wrapper<Host>> peer_addr
 
     if ( is_secure() ) {
 
-        const auto& ssl_context = _ssl_context.value().get();
-        auto ssl = ssl_context.create_ssl();
+        const auto& ssl_context = _ssl_context;
+        auto ssl = ssl_context->create_ssl();
 
         if ( SSL_set_fd( ssl.get(), client.get_socket() ) != 1 ) {
 
