@@ -94,3 +94,9 @@ add_test( NAME Server COMMAND server )
 add_executable( virtual_filesystem virtual_filesystem.cpp )
 target_link_libraries( virtual_filesystem sfap GTest::GTest GTest::Main )
 add_test( NAME VirtualFilesystem COMMAND virtual_filesystem )
+
+
+# TLS Server
+add_executable( tls_server tls_server.cpp )
+target_link_libraries( tls_server sfap GTest::GTest GTest::Main )
+add_test( NAME TLS_Server COMMAND tls_server )
