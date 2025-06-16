@@ -110,13 +110,13 @@ namespace sfap {
              *  \brief Sets the middleware handler for command processing.
              *  \param command_middleware Callable to handle commands.
              */
-            void set_command_middleware( const CommandMiddleware& command_middleware ) noexcept;
+            void set_command_middleware( const CommandMiddleware& command_middleware );
 
             /*!
              *  \brief Sets the middleware handler for user authentication.
              *  \param auth_middleware Callable to handle authentication.
              */
-            void set_auth_middleware( const AuthMiddleware& auth_middleware ) noexcept;
+            void set_auth_middleware( const AuthMiddleware& auth_middleware );
 
             /*!
              *  \brief Stops accepting new incoming connections.

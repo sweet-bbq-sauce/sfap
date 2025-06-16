@@ -139,6 +139,19 @@ namespace sfap {
         };
 
 
+        /*!
+         *  \enum AccessResult
+         *  \brief Represents the result of an access-related operation in the virtual filesystem.
+         */
+        enum class AccessResult : byte_t {
+
+            OK,     ///< The operation was successful.
+            ACCESS_DENIED,      ///< Access to the requested path was denied (e.g., invalid path or not allowed).
+            OUTSIDE_ROOT        ///< The requested path is outside the allowed virtual filesystem root.
+
+        };
+
+
         class CommandRegistry;
         extern const CommandRegistry vanilla_commands;      ///< Static SFAP vanilla commands readonly registry.
 

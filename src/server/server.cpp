@@ -31,8 +31,9 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <thread>
 #include <list>
+#include <stdexcept>
+#include <thread>
 
 #include <net/address/address.hpp>
 #include <net/listener/listener.hpp>
@@ -148,14 +149,26 @@ void Server::set_info_table( const ServerInfoTable& info_table ) {
 }
 
 
-void Server::set_command_middleware( const CommandMiddleware& command_middleware ) noexcept {
+void Server::set_command_middleware( const CommandMiddleware& command_middleware ) {
+
+    if ( command_middleware == nullptr ) {
+
+        throw std::invalid_argument( "command middleware is null" );
+
+    }
 
     _command_middleware = command_middleware;
 
 }
 
 
-void Server::set_auth_middleware( const AuthMiddleware& auth_middleware ) noexcept {
+void Server::set_auth_middleware( const AuthMiddleware& auth_middleware ) {
+
+    if ( auth_middleware == nullptr ) {
+
+        throw std::invalid_argument( "auth middleware is null" );
+
+    }
 
     _auth_middleware = auth_middleware;
 
