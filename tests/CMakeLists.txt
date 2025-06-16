@@ -88,3 +88,9 @@ add_test( NAME Listener COMMAND listener )
 add_executable( server server.cpp )
 target_link_libraries( server sfap GTest::GTest GTest::Main )
 add_test( NAME Server COMMAND server )
+
+
+# Virtual Filesystem
+add_executable( virtual_filesystem virtual_filesystem.cpp )
+target_link_libraries( virtual_filesystem sfap GTest::GTest GTest::Main )
+add_test( NAME VirtualFilesystem COMMAND virtual_filesystem )
