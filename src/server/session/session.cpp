@@ -30,6 +30,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <shared_mutex>
 #include <thread>
@@ -38,6 +39,7 @@
 #include <protocol/protocol.hpp>
 #include <server/server.hpp>
 #include <server/session/session.hpp>
+#include <server/virtual_filesystem/virtual_filesystem.hpp>
 
 
 using namespace sfap;
@@ -62,7 +64,8 @@ Session::Session( net::IOSocket& socket, Server& parent, session_id_t id ) :
     _id( id ),
     _user( std::nullopt ),
     _last_descriptor( 0 ),
-    _state( State::WAITING )
+    _state( State::WAITING ),
+    _filesystem( std::nullopt )
 {
 
     _thread = std::thread( &Session::_command_loop, this );
@@ -210,21 +213,14 @@ void Session::_command_loop() {
                         }
 
                         std::string returned_username;
+                        path_t root_directory;
+                        std::optional<path_t> home_directory = std::nullopt;
                         AuthResult auth_result;
-
-                        // If auth middleware is not set send error.
-                        if ( !_parent._auth_middleware ) {
-
-                            _socket.sende( AuthResult::MIDDLEWARE_ERROR );
-
-                            continue;
-
-                        }
 
                         try {
 
                             // Run authorization middleware.
-                            auth_result = _parent._auth_middleware( credentials, returned_username );
+                            auth_result = _parent._auth_middleware( credentials, returned_username, root_directory, home_directory );
 
                         }
                         catch ( const std::exception& e ) {
@@ -240,6 +236,35 @@ void Session::_command_loop() {
                         if ( auth_result == AuthResult::OK ) {
 
                             if ( returned_username.empty() ) {
+
+                                _socket.sende( AuthResult::MIDDLEWARE_ERROR );
+
+                                break;
+
+                            }
+
+                            if ( !root_directory.is_absolute() || !std::filesystem::is_directory( root_directory ) ) {
+
+                                _socket.sende( AuthResult::MIDDLEWARE_ERROR );
+
+                                break;
+
+                            }
+
+                            try {
+
+                                VirtualFilesystem vfs( root_directory );
+
+                                if ( home_directory ) {
+
+                                    vfs.set_home( home_directory.value() );
+
+                                }
+
+                                _filesystem = vfs;
+
+                            }
+                            catch ( ... ) {
 
                                 _socket.sende( AuthResult::MIDDLEWARE_ERROR );
 
@@ -278,6 +303,7 @@ void Session::_command_loop() {
 
                         _descriptors.clear();
                         _user.reset();
+                        _filesystem.reset();
 
                         break;
 

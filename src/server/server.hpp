@@ -86,7 +86,7 @@ namespace sfap {
              *  \param user Reference to string where authenticated username is stored on success.
              *  \return Result code of authentication.
              */
-            using AuthMiddleware = std::function<protocol::AuthResult( const utils::Credentials& credentials, std::string& user )>;
+            using AuthMiddleware = std::function<protocol::AuthResult( const utils::Credentials& credentials, std::string& user, path_t& root, std::optional<path_t>& home )>;
 
             /*!
              *  \brief Constructs a Server instance bound to the specified address.

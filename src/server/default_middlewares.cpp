@@ -28,8 +28,10 @@
  */
 
 
+#include <filesystem>
 #include <iostream>
 #include <mutex>
+#include <optional>
 
 #include <server/server.hpp>
 #include <utils/credentials.hpp>
@@ -43,13 +45,14 @@ using namespace sfap::utils;
 std::mutex _cout_mutex;
 
 
-const Server::AuthMiddleware Server::default_authorize_middleware = []( const Credentials& credentials, std::string& username ) -> AuthResult {
+const Server::AuthMiddleware Server::default_authorize_middleware = []( const Credentials& credentials, std::string& username, path_t& root, std::optional<path_t> home ) -> AuthResult {
 
     username = credentials.get_user();
+    root = std::filesystem::current_path();
 
     std::lock_guard lock( _cout_mutex );
 
-    std::cout << "User '" << username << "' authorized." << std::endl;
+    std::cout << "User '" << username << "' authorized with chroot: " << root << "." << std::endl;
 
     return AuthResult::OK;
 

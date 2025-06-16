@@ -34,12 +34,14 @@
 #include <atomic>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <set>
 #include <shared_mutex>
 #include <thread>
 
 #include <net/iosocket/iosocket.hpp>
 #include <protocol/protocol.hpp>
+#include <server/virtual_filesystem/virtual_filesystem.hpp>
 
 
 namespace sfap {
@@ -107,6 +109,8 @@ namespace sfap {
                 std::thread _thread;        ///< Thread running the session's command loop.
                 const Server& _parent;      ///< Reference to the parent server instance.
                 std::atomic<bool> _finished;        ///< Flag indicating session has finished and will be cleaned up.
+
+                std::optional<VirtualFilesystem> _filesystem;       ///< Virtual filesystem space.
 
                 std::optional<std::string> _user;           ///< Username if authenticated; std::nullopt if anonymous.
                 mutable std::shared_mutex _user_mutex;      ///< Mutex protecting access to _user.
