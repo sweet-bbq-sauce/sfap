@@ -310,3 +310,31 @@ path_t Client::home( bool use_cache ) const {
     return _cache.home;
 
 }
+
+
+std::vector<path_t> Client::ls( const path_t& path ) const {
+
+    _request_command( Command::LS );
+
+    _socket.sendp( path );
+
+    const auto result = _socket.recve<AccessResult>();
+
+    if ( result != AccessResult::OK ) {
+
+        throw std::runtime_error( "LS returned error: " + std::to_string( (int)result ) );
+
+    }
+
+    const auto size = _socket.recvo<dword_t>();
+    std::vector<path_t> buffer;
+
+    for ( dword_t i = 0; i < size; i++ ) {
+
+        buffer.push_back( _socket.recvp() );
+
+    }
+
+    return buffer;
+
+}

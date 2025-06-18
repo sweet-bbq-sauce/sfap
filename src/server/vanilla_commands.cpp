@@ -104,6 +104,61 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
     });
 
 
+    buffer.add( Command::LS, "ls", []( Session& session, const net::IOSocket& socket ) {
+
+        auto& filesystem = session.get_filesystem();
+
+        const auto path = socket.recvp();
+        const auto result = filesystem.try_normalize( path );
+
+        if ( !result ) {
+
+            socket.sende( AccessResult::ACCESS_DENIED );
+
+        }
+        else if ( !std::filesystem::is_directory( filesystem.to_system( result.value() ) ) ) {
+
+            socket.sende( AccessResult::IS_NOT_DIRECTORY );
+
+        }
+        else {
+
+            std::vector<path_t> entries;
+
+            try {
+
+                for ( const auto& entry : std::filesystem::directory_iterator( filesystem.to_system( result.value() ) ) ) {
+
+                    entries.push_back( entry.path() );
+
+                }
+
+            }
+            catch ( const std::exception& e ) {
+
+                std::cout << e.what() << std::endl;
+
+                socket.sende( AccessResult::INTERNAL_ERROR );
+
+                return;
+
+            }
+
+            socket.sende( AccessResult::OK );
+
+            socket.sendo( static_cast<dword_t>( entries.size() ) );
+
+            for ( const auto& entry : entries ) {
+
+                socket.sendp( filesystem.to_virtual( entry ) );
+
+            }
+
+        }
+
+    });
+
+
     return buffer;
 
     

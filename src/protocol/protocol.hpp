@@ -66,9 +66,11 @@ namespace sfap {
             AUTH,           ///< On success, clears the current session and sets the session username to the provided value. Executes authenticating middleware (`AuthMiddleware`) on the server.
             CLEAR,          ///< Clears the current session: resets username to null and closes all opened descriptors.
 
-            CD,
-            PWD,
-            HOME
+            // ---------------- Filesystem View ---------------
+            CD = 0x10,  ///< Changes the current working directory.
+            PWD,        ///< Retrieves the absolute path of the current working directory.
+            HOME,       ///< Retrieves the path to the authenticated user's home directory.
+            LS          ///< Lists the contents of the given directory.
 
         };
 
@@ -150,9 +152,10 @@ namespace sfap {
         enum class AccessResult : byte_t {
 
             OK,     ///< The operation was successful.
-            ACCESS_DENIED,      ///< Access to the requested path was denied (e.g., invalid path or not allowed).
+            ACCESS_DENIED,      ///< Access to the requested path was denied (e.g., due to permissions or invalid session context).
             OUTSIDE_ROOT,       ///< The requested path is outside the allowed virtual filesystem root.
-            IS_NOT_DIRECTORY,   
+            IS_NOT_DIRECTORY,   ///< The path was expected to be a directory, but it was not.
+            INTERNAL_ERROR      ///< An internal error occurred while processing the access request.
 
         };
 

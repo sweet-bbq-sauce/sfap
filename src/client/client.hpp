@@ -161,10 +161,37 @@ namespace sfap {
              */
             bool is_secure() const noexcept;
 
-
+            /*!
+             *  \brief Changes the current working directory of the session.
+             * 
+             *  \param path Path to change into.
+             *  \return The new absolute working directory path after change.
+             */
             path_t cd( const path_t& path ) const;
+
+            /*!
+             *  \brief Retrieves the current working directory of the session.
+             * 
+             *  \param use_cache If true, allows using a cached value; otherwise forces a live query.
+             *  \return Absolute path of the current working directory.
+             */
             path_t pwd( bool use_cache = true ) const;
+
+            /*!
+             *  \brief Retrieves the user's home directory path in the remote session.
+             * 
+             *  \param use_cache If true, allows using a cached value; otherwise forces a live query.
+             *  \return Absolute path to the user's home directory.
+             */
             path_t home( bool use_cache = true ) const;
+
+            /*!
+             *  \brief Lists the contents of a directory.
+             * 
+             *  \param path Directory path to list. Defaults to the current working directory.
+             *  \return A vector of paths representing files and directories within the given path.
+             */
+            std::vector<path_t> ls( const path_t& path = "." ) const;
 
 
         private:
