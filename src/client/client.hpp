@@ -34,6 +34,7 @@
 #include <optional>
 #include <string>
 
+#include <client/file_info.hpp>
 #include <net/address/address.hpp>
 #include <net/iosocket/iosocket.hpp>
 #include <protocol/protocol.hpp>
@@ -186,12 +187,15 @@ namespace sfap {
             path_t home( bool use_cache = true ) const;
 
             /*!
-             *  \brief Lists the contents of a directory.
-             * 
-             *  \param path Directory path to list. Defaults to the current working directory.
-             *  \return A vector of paths representing files and directories within the given path.
+             *  \brief Lists the contents of a directory on the remote server.
+             *
+             *  This command queries the server for the contents of the specified directory path
+             *  and returns a list of entries with metadata such as path, file type and size.
+             *
+             *  \param path The directory path to list. If omitted, the current working directory is used.
+             *  \return A vector of \ref utils::FileInfo objects representing the contents of the directory.
              */
-            std::vector<path_t> ls( const path_t& path = "." ) const;
+            std::vector<utils::FileInfo> ls( const path_t& path = "." ) const;
 
 
         private:

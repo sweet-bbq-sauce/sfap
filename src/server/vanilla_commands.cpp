@@ -1,6 +1,6 @@
 /*!
  *  \file
- *  \brief Source file containing `Server` class definition.
+ *  \brief Source file containing SFAP vanilla commands procedures.
  *
  *  \copyright Copyright (c) 2025 Wiktor Sołtys
  *
@@ -123,13 +123,13 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
         }
         else {
 
-            std::vector<path_t> entries;
+            std::vector<std::filesystem::directory_entry> entries;
 
             try {
 
                 for ( const auto& entry : std::filesystem::directory_iterator( filesystem.to_system( result.value() ) ) ) {
 
-                    entries.push_back( entry.path() );
+                    entries.push_back( entry );
 
                 }
 
@@ -150,7 +150,14 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
 
             for ( const auto& entry : entries ) {
 
-                socket.sendp( filesystem.to_virtual( entry ) );
+                // Send entry type.
+                socket.sende( entry.status().type() );
+
+                // Send path.
+                socket.sendp( filesystem.to_virtual( entry.path() ) );
+
+                // Send file size or 0 if is not regular file.
+                socket.sendo( static_cast<qword_t>( entry.is_regular_file() ? entry.file_size() : 0 ) );
 
             }
 

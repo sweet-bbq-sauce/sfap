@@ -31,6 +31,7 @@
 #include <stdexcept>
 
 #include <client/client.hpp>
+#include <client/file_info.hpp>
 #include <net/address/address.hpp>
 #include <net/connect/connect.hpp>
 #include <net/iosocket/iosocket.hpp>
@@ -312,7 +313,7 @@ path_t Client::home( bool use_cache ) const {
 }
 
 
-std::vector<path_t> Client::ls( const path_t& path ) const {
+std::vector<utils::FileInfo> Client::ls( const path_t& path ) const {
 
     _request_command( Command::LS );
 
@@ -327,11 +328,17 @@ std::vector<path_t> Client::ls( const path_t& path ) const {
     }
 
     const auto size = _socket.recvo<dword_t>();
-    std::vector<path_t> buffer;
+    std::vector<utils::FileInfo> buffer;
 
     for ( dword_t i = 0; i < size; i++ ) {
 
-        buffer.push_back( _socket.recvp() );
+        utils::FileInfo entry;
+
+        entry._type = _socket.recve<std::filesystem::file_type>();
+        entry._path = _socket.recvp();
+        entry._size = _socket.recvo<qword_t>();
+
+        buffer.push_back( entry );
 
     }
 
