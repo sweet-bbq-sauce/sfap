@@ -66,13 +66,24 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
 
         auto& filesystem = session.get_filesystem();
 
-        const auto result = filesystem.cd( socket.recvp() );
+        const path_t path = socket.recvp();
 
-        socket.sende( result );
+        if ( std::filesystem::is_directory( filesystem.to_system( path ) ) ) {
 
-        if ( result == AccessResult::OK ) {
+            const auto result = filesystem.cd( path );
 
-            socket.sendp( filesystem.pwd() );
+            socket.sende( result );
+
+            if ( result == AccessResult::OK ) {
+
+                socket.sendp( filesystem.pwd() );
+
+            }
+
+        }
+        else {
+
+            socket.sende( AccessResult::IS_NOT_DIRECTORY );
 
         }
 

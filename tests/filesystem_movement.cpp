@@ -27,7 +27,7 @@ TEST( FilesystemMovement, CheckCommands ) {
         username = "doesn't matter what but must be set";
 
         root = std::filesystem::current_path();
-        home = path_t( "~/sfap" );
+        home = path_t( "~/src" );
 
         return protocol::AuthResult::OK;
 
@@ -40,12 +40,12 @@ TEST( FilesystemMovement, CheckCommands ) {
 
     Client client( server_address, credentials );
 
-    EXPECT_EQ( client.pwd(), path_t( "/sfap" ) );
-    EXPECT_EQ( client.home(), path_t( "/sfap" ) );
-    EXPECT_EQ( client.cd( "folder1" ), path_t( "/sfap/folder1" ) );
-    EXPECT_EQ( client.cd( "folder2" ), path_t( "/sfap/folder1/folder2" ) );
-    EXPECT_EQ( client.cd( "~/folder3" ), path_t( "/sfap/folder3" ) );
-    EXPECT_EQ( client.cd( "/folder4" ), path_t( "/folder4" ) );
+    EXPECT_EQ( client.pwd(), path_t( "/src" ) );
+    EXPECT_EQ( client.home(), path_t( "/src" ) );
+    EXPECT_EQ( client.cd( "CMakeFiles" ), path_t( "/src/CMakeFiles" ) );
+    EXPECT_EQ( client.cd( "sfap.dir" ), path_t( "/src/CMakeFiles/sfap.dir" ) );
+    EXPECT_EQ( client.cd( "~/../docs" ), path_t( "/docs" ) );
+    EXPECT_EQ( client.cd( "/tests" ), path_t( "/tests" ) );
 
     EXPECT_ANY_THROW( client.cd( "../../../" ) );
 

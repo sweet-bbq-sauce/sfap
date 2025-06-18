@@ -151,7 +151,8 @@ namespace sfap {
 
             OK,     ///< The operation was successful.
             ACCESS_DENIED,      ///< Access to the requested path was denied (e.g., invalid path or not allowed).
-            OUTSIDE_ROOT        ///< The requested path is outside the allowed virtual filesystem root.
+            OUTSIDE_ROOT,       ///< The requested path is outside the allowed virtual filesystem root.
+            IS_NOT_DIRECTORY,   
 
         };
 
