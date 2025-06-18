@@ -268,23 +268,6 @@ void Server::close() {
 }
 
 
-const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
-
-    CommandRegistry buffer;
-
-    buffer.add( Command::NONE, "none", nullptr );
-    buffer.add( Command::BYE, "bye", nullptr );
-    buffer.add( Command::SERVER_INFO, "server_info", nullptr );
-    buffer.add( Command::COMMANDS, "commands", nullptr );
-    buffer.add( Command::DESCRIPTORS, "descriptors", nullptr );
-    buffer.add( Command::AUTH, "auth", nullptr );
-    buffer.add( Command::CLEAR, "clear", nullptr );
-
-    return buffer;
-
-})();
-
-
 Server::~Server() {
 
     close();

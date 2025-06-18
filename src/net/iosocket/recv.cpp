@@ -48,6 +48,7 @@
 #include <crypto/exception.hpp>
 #include <net/address/host.hpp>
 #include <net/iosocket/iosocket.hpp>
+#include <utils/encoding.hpp>
 
 
 using namespace sfap;
@@ -208,5 +209,12 @@ std::string IOSocket::recvss() const {
     recvs( buffer );
 
     return buffer;
+
+}
+
+
+path_t IOSocket::recvp() const {
+
+    return utils::string_to_path( recvss() );
 
 }

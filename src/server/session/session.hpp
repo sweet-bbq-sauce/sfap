@@ -101,6 +101,14 @@ namespace sfap {
                  */
                 std::set<descriptor_t> get_descriptors() const noexcept;
 
+                /*!
+                 *  \brief Returns the reference to virtual filesystem object.
+                 *  \return Mutable VirtualFilesystem reference.
+                 * 
+                 *  \throws std::logic_error when virtual filesystem is not initialized (e.g. before `AUTH` command).
+                 */
+                VirtualFilesystem& get_filesystem() const;
+
 
             private:
 
@@ -110,7 +118,7 @@ namespace sfap {
                 const Server& _parent;      ///< Reference to the parent server instance.
                 std::atomic<bool> _finished;        ///< Flag indicating session has finished and will be cleaned up.
 
-                std::optional<VirtualFilesystem> _filesystem;       ///< Virtual filesystem space.
+                std::unique_ptr<VirtualFilesystem> _filesystem;     ///< Virtual filesystem space.
 
                 std::optional<std::string> _user;           ///< Username if authenticated; std::nullopt if anonymous.
                 mutable std::shared_mutex _user_mutex;      ///< Mutex protecting access to _user.

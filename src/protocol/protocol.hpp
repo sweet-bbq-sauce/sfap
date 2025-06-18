@@ -64,7 +64,11 @@ namespace sfap {
             COMMANDS,       ///< Retrieves the list of commands supported by the server.
             DESCRIPTORS,    ///< Retrieves the list of open descriptors.
             AUTH,           ///< On success, clears the current session and sets the session username to the provided value. Executes authenticating middleware (`AuthMiddleware`) on the server.
-            CLEAR           ///< Clears the current session: resets username to null and closes all opened descriptors.
+            CLEAR,          ///< Clears the current session: resets username to null and closes all opened descriptors.
+
+            CD,
+            PWD,
+            HOME
 
         };
 

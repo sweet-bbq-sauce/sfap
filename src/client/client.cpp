@@ -28,6 +28,8 @@
  */
 
 
+#include <stdexcept>
+
 #include <client/client.hpp>
 #include <net/address/address.hpp>
 #include <net/connect/connect.hpp>
@@ -94,6 +96,8 @@ protocol::AuthResult Client::authorize( std::shared_ptr<const utils::Credentials
 
         _credentials = credentials;
         _username = _socket.recvss();
+        _cache.home = _socket.recvp();
+        _cache.cwd = _socket.recvp();
 
     }
 
@@ -250,5 +254,59 @@ void Client::_request_command( Command command ) const {
 Client::~Client() {
 
     close();
+
+}
+
+
+path_t Client::cd( const path_t& path ) const {
+
+    _request_command( Command::CD );
+
+    _socket.sendp( path );
+
+    const auto result = _socket.recve<AccessResult>();
+
+    if ( result == AccessResult::OK ) {
+
+        _cache.cwd = _socket.recvp();
+
+        return _cache.cwd;
+
+    }
+    else {
+
+        throw std::runtime_error( "CD returned error: " + std::to_string( (int)result ) );
+
+    }
+
+}
+
+
+path_t Client::pwd( bool use_cache ) const {
+
+    if ( !use_cache ) {
+
+        _request_command( Command::PWD );
+
+        _cache.cwd = _socket.recvp();
+
+    }
+
+    return _cache.cwd;
+
+}
+
+
+path_t Client::home( bool use_cache ) const {
+
+    if ( !use_cache ) {
+
+        _request_command( Command::HOME );
+
+        _cache.home = _socket.recvp();
+
+    }
+
+    return _cache.home;
 
 }

@@ -42,17 +42,10 @@ using namespace sfap::protocol;
 using namespace sfap::utils;
 
 
-std::mutex _cout_mutex;
-
-
-const Server::AuthMiddleware Server::default_authorize_middleware = []( const Credentials& credentials, std::string& username, path_t& root, std::optional<path_t> home ) -> AuthResult {
+const Server::AuthMiddleware Server::default_authorize_middleware = []( const Credentials& credentials, std::string& username, path_t& root, std::optional<path_t>& home ) -> AuthResult {
 
     username = credentials.get_user();
     root = std::filesystem::current_path();
-
-    std::lock_guard lock( _cout_mutex );
-
-    std::cout << "User '" << username << "' authorized with chroot: " << root << "." << std::endl;
 
     return AuthResult::OK;
 
@@ -61,10 +54,6 @@ const Server::AuthMiddleware Server::default_authorize_middleware = []( const Cr
 
 const Server::CommandMiddleware Server::default_command_middleware = []( word_t id, const std::optional<std::string>& user ) -> CommandResult {
 
-    std::lock_guard lock( _cout_mutex );
-    
-    std::cout << ( user ? ( "User '" + user.value() + "'" ) : "Anonymous user" ) << " requested command: " << id << std::endl;
-
-    return ( user ) ? CommandResult::OK : CommandResult::ACCESS_DENIED;
+    return user ? CommandResult::OK : CommandResult::ACCESS_DENIED;
 
 };

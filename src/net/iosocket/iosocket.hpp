@@ -281,6 +281,9 @@ namespace sfap {
                  */
                 std::string recvss() const;
 
+                void sendp( const path_t& path ) const;
+                path_t recvp() const;
+
 
             private:
 

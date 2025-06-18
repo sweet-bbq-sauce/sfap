@@ -162,6 +162,11 @@ namespace sfap {
             bool is_secure() const noexcept;
 
 
+            path_t cd( const path_t& path ) const;
+            path_t pwd( bool use_cache = true ) const;
+            path_t home( bool use_cache = true ) const;
+
+
         private:
 
             /*!
@@ -189,6 +194,12 @@ namespace sfap {
             std::shared_ptr<const utils::Credentials> _credentials;     ///< Credentials used for authorization.
 
             net::IOSocket _socket;      ///< Socket used for communication with the server.
+
+            mutable struct {
+
+                path_t cwd, home;
+
+            } _cache;
 
     };
 

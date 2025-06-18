@@ -48,6 +48,7 @@
 #include <crypto/exception.hpp>
 #include <net/address/host.hpp>
 #include <net/iosocket/iosocket.hpp>
+#include <utils/encoding.hpp>
 
 
 using namespace sfap;
@@ -174,5 +175,12 @@ void IOSocket::sends( const std::string& data ) const {
     }
 
     sendh( data.data(), static_cast<dword_t>( data.size() ) );
+
+}
+
+
+void IOSocket::sendp( const path_t& path ) const {
+
+    sends( utils::path_to_string( path ) );
 
 }

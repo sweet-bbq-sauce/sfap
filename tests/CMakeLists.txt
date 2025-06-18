@@ -100,3 +100,9 @@ add_test( NAME VirtualFilesystem COMMAND virtual_filesystem )
 add_executable( tls_server tls_server.cpp )
 target_link_libraries( tls_server sfap GTest::GTest GTest::Main )
 add_test( NAME TLS_Server COMMAND tls_server )
+
+
+# Filesystem Movement
+add_executable( filesystem_movement filesystem_movement.cpp )
+target_link_libraries( filesystem_movement sfap GTest::GTest GTest::Main )
+add_test( NAME FilesystemMovement COMMAND filesystem_movement )

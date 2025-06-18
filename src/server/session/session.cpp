@@ -65,7 +65,7 @@ Session::Session( net::IOSocket& socket, Server& parent, session_id_t id ) :
     _user( std::nullopt ),
     _last_descriptor( 0 ),
     _state( State::WAITING ),
-    _filesystem( std::nullopt )
+    _filesystem( nullptr )
 {
 
     _thread = std::thread( &Session::_command_loop, this );
@@ -259,9 +259,11 @@ void Session::_command_loop() {
 
                                     vfs.set_home( home_directory.value() );
 
+                                    vfs.cd( "~" );
+
                                 }
 
-                                _filesystem = vfs;
+                                _filesystem = std::make_unique<VirtualFilesystem>( vfs );
 
                             }
                             catch ( ... ) {
@@ -289,6 +291,8 @@ void Session::_command_loop() {
                         if ( auth_result == AuthResult::OK ) {
 
                             _socket.sends( returned_username );
+                            _socket.sendp( _filesystem->get_home() );
+                            _socket.sendp( _filesystem->pwd() );
 
                         }
 
@@ -423,5 +427,18 @@ void Session::close( bool clean ) {
 Session::~Session() {
 
     close( false );
+
+}
+
+
+VirtualFilesystem& Session::get_filesystem() const {
+
+    if ( !_filesystem ) {
+
+        throw std::logic_error( "filesystem is null" );
+
+    }
+
+    return *_filesystem.get();
 
 }
