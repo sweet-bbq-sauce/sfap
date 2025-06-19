@@ -106,3 +106,13 @@ add_test( NAME TLS_Server COMMAND tls_server )
 add_executable( filesystem_movement filesystem_movement.cpp )
 target_link_libraries( filesystem_movement sfap GTest::GTest GTest::Main )
 add_test( NAME FilesystemMovement COMMAND filesystem_movement )
+
+
+# Manual Server
+add_executable( manual_server manual_server.cpp )
+target_link_libraries( manual_server sfap GTest::GTest GTest::Main )
+
+
+# Manual Client
+add_executable( manual_client manual_client.cpp )
+target_link_libraries( manual_client sfap GTest::GTest GTest::Main )
