@@ -56,7 +56,7 @@ path_t FileInfo::get_filename() const noexcept {
 }
 
 
-std::filesystem::file_type FileInfo::get_type() const noexcept {
+FileInfo::type FileInfo::get_type() const noexcept {
 
     return _type;
 
@@ -66,5 +66,33 @@ std::filesystem::file_type FileInfo::get_type() const noexcept {
 qword_t FileInfo::get_size() const noexcept {
 
     return _size;
+
+}
+
+
+FileInfo::type FileInfo::convert_type_from_std( std::filesystem::file_type std_type ) {
+
+    using ft = std::filesystem::file_type;
+
+    switch ( std_type ) {
+
+        case ft::none:          return FileInfo::type::NONE;
+
+        case ft::directory:     return FileInfo::type::DIRECTORY;
+
+        case ft::regular:       return FileInfo::type::REGULAR;
+        case ft::symlink:       return FileInfo::type::SYMLINK;
+        case ft::block:         return FileInfo::type::BLOCK;
+        case ft::character:     return FileInfo::type::CHARACTER;
+        case ft::socket:        return FileInfo::type::SOCKET;
+
+        case ft::not_found:     return FileInfo::type::NOT_FOUND;
+        case ft::unknown:       return FileInfo::type::UNKNOWN;
+
+        default:
+
+            throw std::invalid_argument( "unknown file type" );
+
+    }
 
 }

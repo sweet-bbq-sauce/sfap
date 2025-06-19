@@ -59,6 +59,29 @@ namespace sfap {
 
 
                 /*!
+                 *  \enum type
+                 *  \brief Represents file type value.
+                 */
+                enum class type : byte_t {
+
+                    NONE,
+
+                    DIRECTORY,
+
+                    REGULAR,
+                    SYMLINK,
+                    BLOCK,
+                    CHARACTER,
+                    FIFO,
+                    SOCKET,
+
+                    NOT_FOUND,
+                    UNKNOWN
+
+                };
+
+
+                /*!
                  *  \brief Returns the path to the file or directory.
                  *  \return Reference to the file path.
                  */
@@ -74,9 +97,9 @@ namespace sfap {
 
                 /*!
                  *  \brief Returns the type of the file (regular file, directory, symlink, etc.).
-                 *  \return File type as defined in `std::filesystem::file_type`.
+                 *  \return File type as defined in `type`.
                  */
-                std::filesystem::file_type get_type() const noexcept;
+                type get_type() const noexcept;
 
 
                 /*!
@@ -84,6 +107,13 @@ namespace sfap {
                  *  \return File size. For directories or special files, may be undefined or zero.
                  */
                 qword_t get_size() const noexcept;
+
+
+                /*!
+                 *  \brief Convert file type from C++ implementation enum to SFAP enum.
+                 *  \return File type in SFAP enum.
+                 */
+                static type convert_type_from_std( std::filesystem::file_type std_type );
 
 
             private:
@@ -96,8 +126,8 @@ namespace sfap {
                 explicit FileInfo() noexcept;
 
                 path_t _path;   ///< Full path to the file.
-                std::filesystem::file_type _type;       ///< Type of the file.
-                qword_t _size;      ///< Size of the file in bytes.
+                type _type;     ///< Type of the file.
+                qword_t _size;  ///< Size of the file in bytes.
 
         };
 

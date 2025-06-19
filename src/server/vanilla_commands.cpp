@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <thread>
 
+#include <client/file_info.hpp>
 #include <net/address/address.hpp>
 #include <net/listener/listener.hpp>
 #include <server/command_registry/command_registry.hpp>
@@ -151,7 +152,7 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             for ( const auto& entry : entries ) {
 
                 // Send entry type.
-                socket.sende( entry.status().type() );
+                socket.sende( utils::FileInfo::convert_type_from_std( entry.status().type() ) );
 
                 // Send path.
                 socket.sendp( filesystem.to_virtual( entry.path() ) );

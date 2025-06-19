@@ -334,7 +334,7 @@ std::vector<utils::FileInfo> Client::ls( const path_t& path ) const {
 
         utils::FileInfo entry;
 
-        entry._type = _socket.recve<std::filesystem::file_type>();
+        entry._type = _socket.recve<utils::FileInfo::type>();
         entry._path = _socket.recvp();
         entry._size = _socket.recvo<qword_t>();
 
