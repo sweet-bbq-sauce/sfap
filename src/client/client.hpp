@@ -124,6 +124,13 @@ namespace sfap {
             protocol::ServerInfoTable get_server_info() const;
 
             /*!
+             *  \brief Retrieves opened descriptors ID's
+             *
+             *  \return Vector containing opened descriptors ID's
+             */
+            std::vector<protocol::descriptor_t> get_descriptors() const;
+
+            /*!
              *  \brief Creates a copy of the current client.
              *
              *  The new client maintains the same address and credentials but opens a new connection.
@@ -196,6 +203,22 @@ namespace sfap {
              *  \return A vector of \ref utils::FileInfo objects representing the contents of the directory.
              */
             std::vector<utils::FileInfo> ls( const path_t& path = "." ) const;
+
+            /*!
+             *  \brief Tries to open remote descriptor and retrieves opened descriptor ID on success.
+             * 
+             *  \param path Virtual path of file.
+             *  \param mode Open mode.
+             *  \return Currently opened descriptor ID.
+             */
+            protocol::descriptor_t open_descriptor( const path_t& path, std::ios::openmode mode ) const;
+
+            /*!
+             *  \brief Closes descriptor.
+             * 
+             *  \param path Descriptor ID.
+             */
+            void close_descriptor( protocol::descriptor_t descriptor ) const;
 
 
         private:

@@ -116,3 +116,8 @@ target_link_libraries( manual_server sfap GTest::GTest GTest::Main )
 # Manual Client
 add_executable( manual_client manual_client.cpp )
 target_link_libraries( manual_client sfap GTest::GTest GTest::Main )
+
+
+# Stream IO
+add_executable( stream_io stream_io.cpp )
+target_link_libraries( stream_io sfap GTest::GTest GTest::Main )

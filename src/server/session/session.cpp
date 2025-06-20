@@ -442,3 +442,25 @@ VirtualFilesystem& Session::get_filesystem() const {
     return *_filesystem.get();
 
 }
+
+
+descriptor_t Session::add_descriptor( std::fstream& stream ) noexcept {
+
+    std::unique_lock lock( _descriptors_mutex );
+
+    const auto current = ++_last_descriptor;
+
+    _descriptors.emplace( current, std::move( stream ) );
+
+    return current;
+
+}
+
+
+void Session::close_descriptor( descriptor_t descriptor ) noexcept {
+
+    std::unique_lock lock( _descriptors_mutex );
+
+    _descriptors.erase( descriptor );
+
+}

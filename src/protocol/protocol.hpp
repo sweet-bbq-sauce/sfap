@@ -70,7 +70,18 @@ namespace sfap {
             CD = 0x10,  ///< Changes the current working directory.
             PWD,        ///< Retrieves the absolute path of the current working directory.
             HOME,       ///< Retrieves the path to the authenticated user's home directory.
-            LS          ///< Lists the contents of the given directory.
+            LS,         ///< Lists the contents of the given directory.
+
+            // ----------------- File Streams -----------------
+            OPEN,
+            CLOSE,
+            WRITE,
+            READ,
+            SEEKG,
+            TELLG,
+            SEEKP,
+            TELLP,
+            IOSTATE
 
         };
 
@@ -155,6 +166,7 @@ namespace sfap {
             ACCESS_DENIED,      ///< Access to the requested path was denied (e.g., due to permissions or invalid session context).
             OUTSIDE_ROOT,       ///< The requested path is outside the allowed virtual filesystem root.
             IS_NOT_DIRECTORY,   ///< The path was expected to be a directory, but it was not.
+            CANT_OPEN_FILE,     ///< 
             INTERNAL_ERROR      ///< An internal error occurred while processing the access request.
 
         };

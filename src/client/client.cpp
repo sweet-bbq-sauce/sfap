@@ -345,3 +345,50 @@ std::vector<utils::FileInfo> Client::ls( const path_t& path ) const {
     return buffer;
 
 }
+
+
+descriptor_t Client::open_descriptor( const path_t& path, std::ios::openmode mode ) const {
+
+    _request_command( Command::OPEN );
+
+    _socket.sendp( path );
+    _socket.sendo( static_cast<dword_t>( mode ) );
+
+    const auto result = _socket.recve<AccessResult>();
+
+    if ( result != AccessResult::OK ) {
+
+        throw std::runtime_error( "OPEN returned error: " + std::to_string( (int)result ) );
+
+    }
+
+    return _socket.recvo<descriptor_t>();
+
+}
+
+
+void Client::close_descriptor( descriptor_t descriptor ) const {
+
+    _request_command( Command::CLOSE );
+
+    _socket.sendo( descriptor );
+
+}
+
+
+std::vector<descriptor_t> Client::get_descriptors() const {
+
+    _request_command( Command::DESCRIPTORS );
+
+    const auto size = _socket.recvo<dword_t>();
+    std::vector<descriptor_t> buffer;
+
+    for ( dword_t i = 0; i < size; i++ ) {
+
+        buffer.push_back( _socket.recvo<descriptor_t>() );
+
+    }
+
+    return buffer;
+
+}

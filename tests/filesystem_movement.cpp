@@ -4,6 +4,8 @@
 #include <server/server.hpp>
 #include <client/client.hpp>
 
+#include <tests/tests.hpp>
+
 
 using namespace sfap;
 using namespace sfap::net;
@@ -26,7 +28,8 @@ TEST( FilesystemMovement, CheckCommands ) {
 
         username = "doesn't matter what but must be set";
 
-        root = std::filesystem::current_path();
+        root = path_t( SFAP_BINARY_DIR );
+
         home = path_t( "~/src" );
 
         return protocol::AuthResult::OK;

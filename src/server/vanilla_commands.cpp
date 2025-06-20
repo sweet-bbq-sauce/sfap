@@ -167,6 +167,46 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
     });
 
 
+    buffer.add( Command::OPEN, "open", []( Session& session, const net::IOSocket& socket ) {
+
+        auto& filesystem = session.get_filesystem();
+
+        const auto path = socket.recvp();
+        const auto mode = static_cast<std::ios::openmode>( socket.recvo<dword_t>() );
+        const auto result = filesystem.try_normalize( path );
+
+        if ( !result ) {
+
+            socket.sende( AccessResult::ACCESS_DENIED );
+
+            return;
+
+        }
+
+        std::fstream file( filesystem.to_system( result.value() ), mode );
+
+        if ( file.bad() ) {
+
+            socket.sende( AccessResult::CANT_OPEN_FILE );
+
+        }
+        else {
+
+            socket.sende( AccessResult::OK );
+            socket.sendo( session.add_descriptor( file ) );
+
+        }
+
+    });
+
+
+    buffer.add( Command::CLOSE, "close", []( Session& session, const net::IOSocket& socket ) {
+
+        session.close_descriptor( socket.recvo<descriptor_t>() );
+
+    });
+
+
     return buffer;
 
     

@@ -102,6 +102,21 @@ namespace sfap {
                 std::set<descriptor_t> get_descriptors() const noexcept;
 
                 /*!
+                 *  \brief Adds std::fstream to descriptors table and returns new descriptor ID.
+                 *
+                 *  \param stream Reference to `std::fstream`.
+                 *  \return New descriptor ID.
+                 */
+                descriptor_t add_descriptor( std::fstream& stream ) noexcept;
+
+                /*!
+                 *  \brief Removes descriptor from table.
+                 *
+                 *  \param stream Descriptor ID to remove.
+                 */
+                void close_descriptor( descriptor_t descriptor ) noexcept;
+
+                /*!
                  *  \brief Returns the reference to virtual filesystem object.
                  *  \return Mutable VirtualFilesystem reference.
                  * 
