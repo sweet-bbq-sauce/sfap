@@ -72,16 +72,16 @@ namespace sfap {
             HOME,       ///< Retrieves the path to the authenticated user's home directory.
             LS,         ///< Lists the contents of the given directory.
 
-            // ----------------- File Streams -----------------
-            OPEN,
-            CLOSE,
-            WRITE,
-            READ,
-            SEEKG,
-            TELLG,
-            SEEKP,
-            TELLP,
-            IOSTATE
+            // ------------------ File Stream -----------------
+            OPEN = 0x20,    ///< Opens a file and returns a file descriptor.
+            CLOSE,          ///< Closes an open file descriptor.
+            WRITE,          ///< Writes data to a file descriptor.
+            READ,           ///< Reads data from a file descriptor.
+            SEEKG,          ///< Moves the input position indicator (get pointer) in a file.
+            TELLG,          ///< Retrieves the current input position (get pointer).
+            SEEKP,          ///< Moves the output position indicator (put pointer) in a file.
+            TELLP,          ///< Retrieves the current output position (put pointer).
+            IOSTATE         ///< Retrieves the current I/O state of the stream (e.g., good, fail, eof).
 
         };
 

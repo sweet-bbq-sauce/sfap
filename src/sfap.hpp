@@ -103,10 +103,24 @@ namespace sfap {
 
 
     /*!
+     *  \typedef virtual_path_t
+     *  \brief Alias for `path_t` to represent virtual path.
+     */
+    using virtual_path_t = path_t;
+
+
+    /*!
      *  \typedef port_t
      *  \brief Alias for `uint16_t` to represent network port.
      */
     using port_t = word_t;
+
+
+    /*!
+     *  \typedef crc_t
+     *  \brief Alias for `dword_t` to represent CRC value.
+     */
+    using crc_t = dword_t;
 
 
     #ifdef _WIN32

@@ -57,9 +57,6 @@ namespace sfap {
 
             public:
 
-                /// Alias for the type representing a virtual path.
-                using virtual_path_t = path_t;
-
 
                 /*!
                  *  \brief Constructs a VirtualFilesystem with the specified root directory.

@@ -175,7 +175,7 @@ namespace sfap {
              *  \param path Path to change into.
              *  \return The new absolute working directory path after change.
              */
-            path_t cd( const path_t& path ) const;
+            virtual_path_t cd( const virtual_path_t& path ) const;
 
             /*!
              *  \brief Retrieves the current working directory of the session.
@@ -183,7 +183,7 @@ namespace sfap {
              *  \param use_cache If true, allows using a cached value; otherwise forces a live query.
              *  \return Absolute path of the current working directory.
              */
-            path_t pwd( bool use_cache = true ) const;
+            virtual_path_t pwd( bool use_cache = true ) const;
 
             /*!
              *  \brief Retrieves the user's home directory path in the remote session.
@@ -191,7 +191,7 @@ namespace sfap {
              *  \param use_cache If true, allows using a cached value; otherwise forces a live query.
              *  \return Absolute path to the user's home directory.
              */
-            path_t home( bool use_cache = true ) const;
+            virtual_path_t home( bool use_cache = true ) const;
 
             /*!
              *  \brief Lists the contents of a directory on the remote server.
@@ -202,7 +202,7 @@ namespace sfap {
              *  \param path The directory path to list. If omitted, the current working directory is used.
              *  \return A vector of \ref utils::FileInfo objects representing the contents of the directory.
              */
-            std::vector<utils::FileInfo> ls( const path_t& path = "." ) const;
+            std::vector<utils::FileInfo> ls( const virtual_path_t& path = "." ) const;
 
             /*!
              *  \brief Tries to open remote descriptor and retrieves opened descriptor ID on success.
@@ -211,7 +211,7 @@ namespace sfap {
              *  \param mode Open mode.
              *  \return Currently opened descriptor ID.
              */
-            protocol::descriptor_t open_descriptor( const path_t& path, std::ios::openmode mode ) const;
+            protocol::descriptor_t open_descriptor( const virtual_path_t& path, std::ios::openmode mode ) const;
 
             /*!
              *  \brief Closes descriptor.

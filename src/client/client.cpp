@@ -259,7 +259,7 @@ Client::~Client() {
 }
 
 
-path_t Client::cd( const path_t& path ) const {
+virtual_path_t Client::cd( const virtual_path_t& path ) const {
 
     _request_command( Command::CD );
 
@@ -283,7 +283,7 @@ path_t Client::cd( const path_t& path ) const {
 }
 
 
-path_t Client::pwd( bool use_cache ) const {
+virtual_path_t Client::pwd( bool use_cache ) const {
 
     if ( !use_cache ) {
 
@@ -298,7 +298,7 @@ path_t Client::pwd( bool use_cache ) const {
 }
 
 
-path_t Client::home( bool use_cache ) const {
+virtual_path_t Client::home( bool use_cache ) const {
 
     if ( !use_cache ) {
 
@@ -313,7 +313,7 @@ path_t Client::home( bool use_cache ) const {
 }
 
 
-std::vector<utils::FileInfo> Client::ls( const path_t& path ) const {
+std::vector<utils::FileInfo> Client::ls( const virtual_path_t& path ) const {
 
     _request_command( Command::LS );
 
@@ -347,7 +347,7 @@ std::vector<utils::FileInfo> Client::ls( const path_t& path ) const {
 }
 
 
-descriptor_t Client::open_descriptor( const path_t& path, std::ios::openmode mode ) const {
+descriptor_t Client::open_descriptor( const virtual_path_t& path, std::ios::openmode mode ) const {
 
     _request_command( Command::OPEN );
 

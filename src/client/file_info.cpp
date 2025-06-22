@@ -42,14 +42,14 @@ using namespace sfap::utils;
 FileInfo::FileInfo() noexcept {}
 
 
-const path_t& FileInfo::get_path() const noexcept {
+const virtual_path_t& FileInfo::get_path() const noexcept {
 
     return _path;
     
 }
 
 
-path_t FileInfo::get_filename() const noexcept {
+virtual_path_t FileInfo::get_filename() const noexcept {
 
     return _path.filename();
 
@@ -63,7 +63,7 @@ FileInfo::type FileInfo::get_type() const noexcept {
 }
 
 
-qword_t FileInfo::get_size() const noexcept {
+std::size_t FileInfo::get_size() const noexcept {
 
     return _size;
 

@@ -142,7 +142,7 @@ AccessResult VirtualFilesystem::set_home( const virtual_path_t& home ) noexcept 
 }
 
 
-VirtualFilesystem::virtual_path_t VirtualFilesystem::get_home() const noexcept {
+virtual_path_t VirtualFilesystem::get_home() const noexcept {
 
     return _home_directory.generic_string();
 
@@ -167,7 +167,7 @@ AccessResult VirtualFilesystem::cd( const virtual_path_t& directory ) {
 }
 
 
-VirtualFilesystem::virtual_path_t VirtualFilesystem::pwd() const noexcept {
+virtual_path_t VirtualFilesystem::pwd() const noexcept {
 
     return _current_working_directory.generic_string();
 
@@ -202,7 +202,7 @@ path_t VirtualFilesystem::to_system( const virtual_path_t& path ) const {
 }
 
 
-VirtualFilesystem::virtual_path_t VirtualFilesystem::to_virtual( const path_t& path ) const {
+virtual_path_t VirtualFilesystem::to_virtual( const path_t& path ) const {
 
     if ( check_access( path ) != AccessResult::OK ) {
 
@@ -223,7 +223,7 @@ VirtualFilesystem::virtual_path_t VirtualFilesystem::to_virtual( const path_t& p
 }
 
 
-std::optional<VirtualFilesystem::virtual_path_t> VirtualFilesystem::try_to_virtual( const path_t& path ) const noexcept {
+std::optional<virtual_path_t> VirtualFilesystem::try_to_virtual( const path_t& path ) const noexcept {
 
     try {
 
@@ -239,14 +239,14 @@ std::optional<VirtualFilesystem::virtual_path_t> VirtualFilesystem::try_to_virtu
 }
 
 
-VirtualFilesystem::virtual_path_t VirtualFilesystem::normalize( const virtual_path_t& path ) const {
+virtual_path_t VirtualFilesystem::normalize( const virtual_path_t& path ) const {
 
     return to_virtual( to_system( path ) );
 
 }
 
 
-std::optional<VirtualFilesystem::virtual_path_t> VirtualFilesystem::try_normalize( const path_t& path ) const noexcept {
+std::optional<virtual_path_t> VirtualFilesystem::try_normalize( const virtual_path_t& path ) const noexcept {
 
     return try_to_virtual( to_system( path ) );
 

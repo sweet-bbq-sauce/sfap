@@ -85,14 +85,14 @@ namespace sfap {
                  *  \brief Returns the path to the file or directory.
                  *  \return Reference to the file path.
                  */
-                const path_t& get_path() const noexcept;
+                const virtual_path_t& get_path() const noexcept;
 
 
                 /*!
                  *  \brief Returns the file name.
                  *  \return File name.
                  */
-                path_t get_filename() const noexcept;
+                virtual_path_t get_filename() const noexcept;
 
 
                 /*!
@@ -106,7 +106,7 @@ namespace sfap {
                  *  \brief Returns the file size in bytes.
                  *  \return File size. For directories or special files, may be undefined or zero.
                  */
-                qword_t get_size() const noexcept;
+                std::size_t get_size() const noexcept;
 
 
                 /*!
@@ -125,9 +125,9 @@ namespace sfap {
                  */
                 explicit FileInfo() noexcept;
 
-                path_t _path;   ///< Full path to the file.
-                type _type;     ///< Type of the file.
-                qword_t _size;  ///< Size of the file in bytes.
+                virtual_path_t _path;   ///< Full path to the file.
+                type _type;             ///< Type of the file.
+                std::size_t _size;      ///< Size of the file in bytes.
 
         };
 
