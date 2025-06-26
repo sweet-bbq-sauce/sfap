@@ -20,6 +20,7 @@ set( CMAKE_CXX_EXTENSIONS OFF )
 
 # Find dependecies
 find_package( OpenSSL REQUIRED )
+find_package( ZLIB REQUIRED )
 
 
 # Default resolve mode

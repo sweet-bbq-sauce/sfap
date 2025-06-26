@@ -121,3 +121,10 @@ target_link_libraries( manual_client sfap GTest::GTest GTest::Main )
 # Stream IO
 add_executable( stream_io stream_io.cpp )
 target_link_libraries( stream_io sfap GTest::GTest GTest::Main )
+add_test( NAME StreamIO COMMAND stream_io )
+
+
+# CRC
+add_executable( crc crc.cpp )
+target_link_libraries( crc sfap GTest::GTest GTest::Main )
+add_test( NAME CRC COMMAND crc )
