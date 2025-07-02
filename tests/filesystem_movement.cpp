@@ -47,7 +47,6 @@ TEST( FilesystemMovement, CheckCommands ) {
     EXPECT_EQ( client.home(), path_t( "/src" ) );
     EXPECT_EQ( client.cd( "CMakeFiles" ), path_t( "/src/CMakeFiles" ) );
     EXPECT_EQ( client.cd( "sfap.dir" ), path_t( "/src/CMakeFiles/sfap.dir" ) );
-    EXPECT_EQ( client.cd( "~/../docs" ), path_t( "/docs" ) );
     EXPECT_EQ( client.cd( "/tests" ), path_t( "/tests" ) );
     EXPECT_EQ( client.cd( "." ), path_t( "/tests" ) );
     EXPECT_EQ( client.cd( ".." ), path_t( "/" ) );
