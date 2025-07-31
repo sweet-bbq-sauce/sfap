@@ -464,3 +464,21 @@ void Session::close_descriptor( descriptor_t descriptor ) noexcept {
     _descriptors.erase( descriptor );
 
 }
+
+
+std::optional<std::reference_wrapper<std::fstream>> Session::get_stream( descriptor_t descriptor ) const {
+
+    std::unique_lock lock( _descriptors_mutex );
+
+    if ( _descriptors.find( descriptor ) == _descriptors.end() ) {
+
+        return std::nullopt;
+
+    }
+    else {
+
+        return _descriptors.at( descriptor );
+
+    }
+
+}

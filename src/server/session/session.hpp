@@ -124,6 +124,8 @@ namespace sfap {
                  */
                 VirtualFilesystem& get_filesystem() const;
 
+                std::optional<std::reference_wrapper<std::fstream>> get_stream( descriptor_t descriptor ) const;
+
 
             private:
 
@@ -138,7 +140,7 @@ namespace sfap {
                 std::optional<std::string> _user;           ///< Username if authenticated; std::nullopt if anonymous.
                 mutable std::shared_mutex _user_mutex;      ///< Mutex protecting access to _user.
 
-                std::map<descriptor_t, std::fstream> _descriptors;      ///< Map of open file descriptors to their streams.
+                mutable std::map<descriptor_t, std::fstream> _descriptors;      ///< Map of open file descriptors to their streams.
                 mutable std::shared_mutex _descriptors_mutex;           ///< Mutex protecting access to _descriptors.
                 descriptor_t _last_descriptor;      ///< Last used descriptor ID.
 

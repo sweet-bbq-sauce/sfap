@@ -81,7 +81,7 @@ namespace sfap {
             TELLG,          ///< Retrieves the current input position (get pointer).
             SEEKP,          ///< Moves the output position indicator (put pointer) in a file.
             TELLP,          ///< Retrieves the current output position (put pointer).
-            IOSTATE         ///< Retrieves the current I/O state of the stream (e.g., good, fail, eof).
+            IOSTATE         ///< Retrieves the current I/O flags of the stream (FAIL and EOF).
 
         };
 
@@ -162,12 +162,22 @@ namespace sfap {
          */
         enum class AccessResult : byte_t {
 
-            OK,     ///< The operation was successful.
+            OK,                 ///< The operation was successful.
             ACCESS_DENIED,      ///< Access to the requested path was denied (e.g., due to permissions or invalid session context).
             OUTSIDE_ROOT,       ///< The requested path is outside the allowed virtual filesystem root.
             IS_NOT_DIRECTORY,   ///< The path was expected to be a directory, but it was not.
             CANT_OPEN_FILE,     ///< 
+            BAD_DESCRIPTOR,
             INTERNAL_ERROR      ///< An internal error occurred while processing the access request.
+
+        };
+
+
+        enum class FileStreamResult : byte_t {
+
+            OK,
+            CRC_MISSMATCH,
+            READ_ERROR
 
         };
 

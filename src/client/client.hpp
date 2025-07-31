@@ -220,6 +220,49 @@ namespace sfap {
              */
             void close_descriptor( protocol::descriptor_t descriptor ) const;
 
+            /*!
+             *  \brief Writes a block of data to a remote file descriptor.
+             *
+             *  Sends the specified buffer to the server for writing into an open remote file.
+             *  Automatically performs CRC integrity check on the transmitted payload and updates
+             *  the stream status flags (fail/eof) for the given descriptor.
+             *
+             *  \param descriptor Remote file descriptor ID to write to.
+             *  \param data Pointer to the buffer containing data to write.
+             *  \param size Size of the buffer in bytes.
+             *  \return Number of bytes successfully written.
+             *
+             *  \throws std::runtime_error if the descriptor is invalid or the stream write fails.
+             */
+            dword_t write( protocol::descriptor_t descriptor, const void* data, dword_t size ) const;
+
+            /*!
+             *  \brief Reads a block of data from a remote file descriptor.
+             *
+             *  Requests the server to read up to the specified number of bytes from an open remote file.
+             *  Performs CRC integrity verification on the received payload and updates
+             *  the stream status flags (fail/eof) for the given descriptor.
+             *
+             *  \param descriptor Remote file descriptor ID to read from.
+             *  \param data Pointer to the destination buffer where the data will be stored.
+             *  \param size Maximum number of bytes to read.
+             *  \return Number of bytes actually read and stored into the buffer.
+             *
+             *  \throws std::runtime_error if the descriptor is invalid or the stream read fails.
+             */
+            dword_t read( protocol::descriptor_t descriptor, void* data, dword_t size ) const;
+
+            /*!
+             *  \brief Retrieves the current I/O state flags for a remote file descriptor.
+             *
+             *  Returns the last known stream status for the specified remote descriptor as
+             *  a pair of boolean values corresponding to the fail and eof flags.
+             *
+             *  \param descriptor Remote file descriptor ID to query.
+             *  \return std::pair where first = fail flag, second = eof flag.
+             */
+            std::pair<bool, bool> iostate( protocol::descriptor_t descriptor ) const;
+
 
         private:
 
@@ -252,6 +295,8 @@ namespace sfap {
             mutable struct {
 
                 path_t cwd, home;
+
+                std::map<protocol::descriptor_t, std::pair<bool, bool>> descriptors_flags;
 
             } _cache;
 

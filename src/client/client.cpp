@@ -28,6 +28,7 @@
  */
 
 
+#include <cstring>
 #include <stdexcept>
 
 #include <client/client.hpp>
@@ -36,6 +37,7 @@
 #include <net/connect/connect.hpp>
 #include <net/iosocket/iosocket.hpp>
 #include <protocol/protocol.hpp>
+#include <utils/crc.hpp>
 #include <utils/credentials.hpp>
 
 
@@ -46,7 +48,7 @@ using namespace sfap::protocol;
 Client::Client( const net::Address& address, std::shared_ptr<const utils::Credentials> credentials ) :
     _socket( net::connect( address ) ),
     _address( address ),
-    _username( std::nullopt)
+    _username( std::nullopt )
 {
     
     if ( credentials ) {
@@ -362,7 +364,15 @@ descriptor_t Client::open_descriptor( const virtual_path_t& path, std::ios::open
 
     }
 
-    return _socket.recvo<descriptor_t>();
+    // Receive new descriptor.
+    const auto descriptor = _socket.recvo<descriptor_t>();
+
+    // Receive stream status flags (FAIL and EOF).
+    const auto fail = _socket.recvb();
+    const auto eof = _socket.recvb();
+    _cache.descriptors_flags[descriptor] = std::make_pair( fail, eof );
+
+    return descriptor;
 
 }
 
@@ -372,6 +382,8 @@ void Client::close_descriptor( descriptor_t descriptor ) const {
     _request_command( Command::CLOSE );
 
     _socket.sendo( descriptor );
+
+    _cache.descriptors_flags.erase( descriptor );
 
 }
 
@@ -390,5 +402,132 @@ std::vector<descriptor_t> Client::get_descriptors() const {
     }
 
     return buffer;
+
+}
+
+
+dword_t Client::write( descriptor_t descriptor, const void* data, dword_t size ) const {
+
+    _request_command( Command::WRITE );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // If OK then send payload ...
+    _socket.sendh( data, size );
+
+    // ... with CRC.
+    _socket.sendo( utils::CRC::data( data, size ) );
+
+    // Receive I/O result.
+    const auto stream_result = _socket.recve<FileStreamResult>();
+
+    // Check if stream operation ended successfully.
+    if ( stream_result != FileStreamResult::OK ) {
+
+        throw std::runtime_error( "stream write error" );
+
+    }
+
+    // Receive stream status flags (FAIL and EOF).
+    _cache.descriptors_flags[descriptor].first = _socket.recvb();
+    _cache.descriptors_flags[descriptor].second = _socket.recvb();
+
+    // Return writed size (temporary this way).
+    return size;
+
+}
+
+
+dword_t Client::read( descriptor_t descriptor, void* data, dword_t size ) const {
+
+    _request_command( Command::READ );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Send data size requested to read.
+    _socket.sendo( size );
+
+    // Receive read result status.
+    const auto read_result = _socket.recve<FileStreamResult>();
+
+    // If read result is not OK then abort procedure and throw error.
+    if ( read_result != FileStreamResult::OK ) {
+
+        throw std::runtime_error( "stream read error" );
+
+    }
+
+    // Receive payload ...
+    data_t payload;
+    _socket.recvd( payload );
+
+    // ... with server's CRC.
+    const auto server_crc = _socket.recvo<crc_t>();
+
+    // Check payload integration comparing CRC from server with actually received data from server.
+    if ( utils::CRC::data( payload.data(), payload.size() ) != server_crc ) {
+
+        throw std::runtime_error( "CRC checksum missmatch" );
+
+    }
+
+    // Receive stream status flags (FAIL and EOF).
+    _cache.descriptors_flags[descriptor].first = _socket.recvb();
+    _cache.descriptors_flags[descriptor].second = _socket.recvb();
+
+    // Finally copy payload from buffer to destination ...
+    std::memcpy( data, payload.data(), payload.size() );
+
+    // ... and return received payload size.
+    return static_cast<dword_t>( payload.size() );
+
+}
+
+
+std::pair<bool, bool> Client::iostate( protocol::descriptor_t descriptor ) const {
+
+    _request_command( Command::IOSTATE );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Receive stream status flags (FAIL and EOF).
+    _cache.descriptors_flags[descriptor].first = _socket.recvb();
+    _cache.descriptors_flags[descriptor].second = _socket.recvb();
+
+    // Return stream state flags.
+    return _cache.descriptors_flags[descriptor];
 
 }
