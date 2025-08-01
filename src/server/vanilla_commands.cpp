@@ -349,6 +349,134 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
     });
 
 
+    buffer.add( Command::TELLG, "tellg", []( Session& session, const net::IOSocket& socket ) {
+
+        // Receive requested descriptor from client.
+        const auto descriptor = socket.recvo<descriptor_t>();
+
+        // Try to get stream from descriptor.
+        const auto result = session.get_stream( descriptor );
+
+        if ( result ) {
+
+            // If found, send `AccessResult::OK` ...
+            socket.sende( AccessResult::OK );
+
+            // Send read pointer position to client.
+            auto& stream = result.value().get();
+            socket.sendo( static_cast<int64_t>( stream.tellg() ) );
+
+        }
+        else {
+
+            // If not found send `AccessResult::BAD_DESCRIPTOR` and abort command.
+            socket.sende( AccessResult::BAD_DESCRIPTOR );
+
+        }
+
+    });
+
+
+    buffer.add( Command::SEEKG, "seekg", []( Session& session, const net::IOSocket& socket ) {
+
+        // Receive requested descriptor from client.
+        const auto descriptor = socket.recvo<descriptor_t>();
+
+        // Try to get stream from descriptor.
+        const auto result = session.get_stream( descriptor );
+
+        if ( result ) {
+
+            // If found, send `AccessResult::OK` ...
+            socket.sende( AccessResult::OK );
+
+            // Receive requested read pointer position from client.
+            const auto raw = socket.recvo<int64_t>();
+            const auto position = ( raw == -1 ) ? std::streampos( -1 ) : std::streampos( raw );
+
+            // Set it in stream.
+            auto& stream = result.value().get();
+            stream.seekg( position );
+
+            // Send actually read pointer position to client.
+            const auto actually_position = stream.tellg();
+            socket.sendo<int64_t>( ( actually_position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( actually_position ) );
+
+        }
+        else {
+
+            // If not found send `AccessResult::BAD_DESCRIPTOR` and abort command.
+            socket.sende( AccessResult::BAD_DESCRIPTOR );
+
+        }
+
+    });
+
+
+    buffer.add( Command::TELLP, "tellp", []( Session& session, const net::IOSocket& socket ) {
+
+        // Receive requested descriptor from client.
+        const auto descriptor = socket.recvo<descriptor_t>();
+
+        // Try to get stream from descriptor.
+        const auto result = session.get_stream( descriptor );
+
+        if ( result ) {
+
+            // If found, send `AccessResult::OK` ...
+            socket.sende( AccessResult::OK );
+
+            // Send write pointer position to client.
+            auto& stream = result.value().get();
+            socket.sendo( static_cast<int64_t>( stream.tellp() ) );
+
+        }
+        else {
+
+            // If not found send `AccessResult::BAD_DESCRIPTOR` and abort command.
+            socket.sende( AccessResult::BAD_DESCRIPTOR );
+
+        }
+
+    });
+
+
+    buffer.add( Command::SEEKP, "seekp", []( Session& session, const net::IOSocket& socket ) {
+
+        // Receive requested descriptor from client.
+        const auto descriptor = socket.recvo<descriptor_t>();
+
+        // Try to get stream from descriptor.
+        const auto result = session.get_stream( descriptor );
+
+        if ( result ) {
+
+            // If found, send `AccessResult::OK` ...
+            socket.sende( AccessResult::OK );
+
+            // Receive requested write pointer position from client.
+            const auto raw = socket.recvo<int64_t>();
+            const auto position = ( raw == -1 ) ? std::streampos( -1 ) : std::streampos( raw );
+
+            // Set it in stream.
+            auto& stream = result.value().get();
+            stream.seekp( position );
+
+            // Send actually write pointer position to client.
+            const auto actually_position = stream.tellp();
+            socket.sendo<int64_t>( ( actually_position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( actually_position ) );
+
+        }
+        else {
+
+            // If not found send `AccessResult::BAD_DESCRIPTOR` and abort command.
+            socket.sende( AccessResult::BAD_DESCRIPTOR );
+
+        }
+
+    });
+
+
     return buffer;
 
     

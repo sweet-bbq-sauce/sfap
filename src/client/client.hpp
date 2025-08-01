@@ -263,6 +263,44 @@ namespace sfap {
              */
             std::pair<bool, bool> iostate( protocol::descriptor_t descriptor ) const;
 
+            /*!
+             *  \brief Get current read pointer position for a given remote file descriptor.
+             *
+             *  \param descriptor Remote file descriptor.
+             *  \return Current read pointer position as std::streampos.
+             *          Returns std::streampos(-1) on error or invalid descriptor.
+             */
+            std::streampos tellg( protocol::descriptor_t descriptor ) const;
+
+            /*!
+             *  \brief Set the read pointer position for a given remote file descriptor.
+             *
+             *  \param descriptor Remote file descriptor.
+             *  \param position New read pointer position. Use std::streampos(-1) to signal invalid.
+             *  \return Actual read pointer position after the operation.
+             *          Returns std::streampos(-1) if the operation failed.
+             */
+            std::streampos seekg( protocol::descriptor_t descriptor, std::streampos position ) const;
+
+            /*!
+             *  \brief Get current write pointer position for a given remote file descriptor.
+             *
+             *  \param descriptor Remote file descriptor.
+             *  \return Current write pointer position as std::streampos.
+             *          Returns std::streampos(-1) on error or invalid descriptor.
+             */
+            std::streampos tellp( protocol::descriptor_t descriptor ) const;
+
+            /*!
+             *  \brief Set the write pointer position for a given remote file descriptor.
+             *
+             *  \param descriptor Remote file descriptor.
+             *  \param position New write pointer position. Use std::streampos(-1) to signal invalid.
+             *  \return Actual write pointer position after the operation.
+             *          Returns std::streampos(-1) if the operation failed.
+             */
+            std::streampos seekp( protocol::descriptor_t descriptor, std::streampos position ) const;
+
 
         private:
 

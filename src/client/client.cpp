@@ -531,3 +531,103 @@ std::pair<bool, bool> Client::iostate( protocol::descriptor_t descriptor ) const
     return _cache.descriptors_flags[descriptor];
 
 }
+
+
+std::streampos Client::tellg( protocol::descriptor_t descriptor ) const {
+
+    _request_command( Command::TELLG );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Receive raw read pointer position from server and return it.
+    const auto raw = _socket.recvo<int64_t>();
+    return ( raw == -1 ) ? std::streampos( -1 ) : std::streampos( raw );
+
+}
+
+
+std::streampos Client::seekg( protocol::descriptor_t descriptor, std::streampos position ) const {
+
+    _request_command( Command::SEEKG );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Send requested read pointer position to server.
+    _socket.sendo<int64_t>( ( position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( position ) );
+
+    const auto actually_position = _socket.recvo<int64_t>();
+    return ( actually_position == -1 ) ? std::streampos( -1 ) : std::streampos( actually_position );
+
+}
+
+
+std::streampos Client::tellp( protocol::descriptor_t descriptor ) const {
+
+    _request_command( Command::TELLP );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Receive raw write pointer position from server and return it.
+    const auto raw = _socket.recvo<int64_t>();
+    return ( raw == -1 ) ? std::streampos( -1 ) : std::streampos( raw );
+
+}
+
+
+std::streampos Client::seekp( protocol::descriptor_t descriptor, std::streampos position ) const {
+
+    _request_command( Command::SEEKP );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Send requested write pointer position to server.
+    _socket.sendo<int64_t>( ( position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( position ) );
+
+    const auto actually_position = _socket.recvo<int64_t>();
+    return ( actually_position == -1 ) ? std::streampos( -1 ) : std::streampos( actually_position );
+
+}

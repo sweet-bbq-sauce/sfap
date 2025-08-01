@@ -62,4 +62,10 @@ TEST( StreamIO, OpenAndClear ) {
 
     EXPECT_EQ( client.iostate( descriptor ), std::make_pair( false, false ) );
 
+    EXPECT_EQ( client.seekg( descriptor, std::streampos( 4 ) ), std::streampos( 4 ) );
+
+    EXPECT_EQ( client.read( descriptor, payload2.data(), payload2.size() ), 9 );
+
+    EXPECT_EQ( payload2, reference2 );
+
 }
