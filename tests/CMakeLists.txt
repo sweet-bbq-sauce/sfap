@@ -128,3 +128,8 @@ add_test( NAME StreamIO COMMAND stream_io )
 add_executable( crc crc.cpp )
 target_link_libraries( crc sfap GTest::GTest GTest::Main )
 add_test( NAME CRC COMMAND crc )
+
+# Human-readable binary data representation.
+add_executable( to_hex to_hex.cpp )
+target_link_libraries( to_hex sfap GTest::GTest GTest::Main )
+add_test( NAME ToHex COMMAND to_hex )
