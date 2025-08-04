@@ -133,3 +133,8 @@ add_test( NAME CRC COMMAND crc )
 add_executable( to_hex to_hex.cpp )
 target_link_libraries( to_hex sfap GTest::GTest GTest::Main )
 add_test( NAME ToHex COMMAND to_hex )
+
+# Data hashing
+add_executable( hash hash.cpp )
+target_link_libraries( hash sfap GTest::GTest GTest::Main )
+add_test( NAME Hash COMMAND hash )
