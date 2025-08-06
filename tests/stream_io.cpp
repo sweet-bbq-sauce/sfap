@@ -37,6 +37,8 @@ TEST( StreamIO, OpenAndClear ) {
 
     EXPECT_NO_THROW( EXPECT_EQ( client.write( 1, "sfapisthebest\n", 14 ), 14 ) );
 
+    EXPECT_NO_THROW( client.flush( 1 ) );
+
     client.clear();
 
     EXPECT_EQ( client.get_descriptors().size(), 0 );

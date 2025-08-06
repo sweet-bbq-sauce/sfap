@@ -81,7 +81,8 @@ namespace sfap {
             TELLG,          ///< Retrieves the current input position (get pointer).
             SEEKP,          ///< Moves the output position indicator (put pointer) in a file.
             TELLP,          ///< Retrieves the current output position (put pointer).
-            IOSTATE         ///< Retrieves the current I/O flags of the stream (FAIL and EOF).
+            IOSTATE,        ///< Retrieves the current I/O flags of the stream (FAIL and EOF).
+            FLUSH
 
         };
 

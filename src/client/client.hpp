@@ -302,6 +302,16 @@ namespace sfap {
              */
             std::streampos seekp( protocol::descriptor_t descriptor, std::streampos position ) const;
 
+            /*!
+             * \brief Flushes the underlying output stream associated with the given descriptor.
+             *
+             * Forces the contents of the stream buffer to be written to the remote endpoint
+             * without closing or altering the stream state.
+             *
+             * \param descriptor The active connection descriptor to flush.
+             */
+            void flush( protocol::descriptor_t descriptor ) const;
+
 
         private:
 

@@ -490,6 +490,37 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
     });
 
 
+    buffer.add( Command::FLUSH, "flush", []( Session& session, const net::IOSocket& socket ) {
+
+        // Receive requested descriptor from client.
+        const auto descriptor = socket.recvo<descriptor_t>();
+
+        // Try to get stream from descriptor.
+        const auto result = session.get_stream( descriptor );
+
+        if ( result ) {
+
+            // If found, send `AccessResult::OK` ...
+            socket.sende( AccessResult::OK );
+
+            // Set it in stream.
+            auto& stream = result.value().get();
+            stream.flush();
+
+            // Send stream state flags.
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
+
+        }
+        else {
+
+            // If not found send `AccessResult::BAD_DESCRIPTOR` and abort command.
+            socket.sende( AccessResult::BAD_DESCRIPTOR );
+
+        }
+
+    });
+
+
     return buffer;
 
     

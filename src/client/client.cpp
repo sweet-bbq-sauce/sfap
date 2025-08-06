@@ -650,3 +650,27 @@ std::streampos Client::seekp( protocol::descriptor_t descriptor, std::streampos 
     return ( actually_position == -1 ) ? std::streampos( -1 ) : std::streampos( actually_position );
 
 }
+
+
+void Client::flush( protocol::descriptor_t descriptor ) const {
+
+    _request_command( Command::FLUSH );
+
+    // Send requested descriptor.
+    _socket.sendo( descriptor );
+
+    // Receive access result.
+    const auto access_result = _socket.recve<AccessResult>();
+
+    // If access result is not OK then abort procedure and throw error.
+    if ( access_result != AccessResult::OK ) {
+
+        throw std::runtime_error( "bad descriptor: " + std::to_string( static_cast<int>( access_result ) ) );
+
+    }
+
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
+
+}
