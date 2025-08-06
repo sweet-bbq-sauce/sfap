@@ -35,6 +35,7 @@
 #include <string>
 
 #include <client/file_info.hpp>
+#include <client/io_state.hpp>
 #include <net/address/address.hpp>
 #include <net/iosocket/iosocket.hpp>
 #include <protocol/protocol.hpp>
@@ -261,7 +262,7 @@ namespace sfap {
              *  \param descriptor Remote file descriptor ID to query.
              *  \return std::pair where first = fail flag, second = eof flag.
              */
-            std::pair<bool, bool> iostate( protocol::descriptor_t descriptor ) const;
+            utils::IOState iostate( protocol::descriptor_t descriptor ) const;
 
             /*!
              *  \brief Get current read pointer position for a given remote file descriptor.
@@ -334,7 +335,7 @@ namespace sfap {
 
                 path_t cwd, home;
 
-                std::map<protocol::descriptor_t, std::pair<bool, bool>> descriptors_flags;
+                std::unordered_map<protocol::descriptor_t, utils::IOState> descriptors_flags;
 
             } _cache;
 

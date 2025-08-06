@@ -51,7 +51,11 @@ TEST( StreamIO, OpenAndClear ) {
 
     EXPECT_EQ( payload1, reference1 );
 
-    EXPECT_EQ( client.iostate( descriptor ), std::make_pair( false, false ) );
+    const auto& state1 = client.iostate( descriptor );
+
+    EXPECT_FALSE( state1.fail() );
+    EXPECT_FALSE( state1.bad() );
+    EXPECT_FALSE( state1.eof() );
 
     data_t payload2( 9 );
     const data_t reference2 = {'i', 's', 't', 'h', 'e', 'b', 'e', 's', 't'};
@@ -60,12 +64,24 @@ TEST( StreamIO, OpenAndClear ) {
 
     EXPECT_EQ( payload2, reference2 );
 
-    EXPECT_EQ( client.iostate( descriptor ), std::make_pair( false, false ) );
+    const auto& state2 = client.iostate( descriptor );
+
+    EXPECT_FALSE( state2.fail() );
+    EXPECT_FALSE( state2.bad() );
+    EXPECT_FALSE( state2.eof() );
 
     EXPECT_EQ( client.seekg( descriptor, std::streampos( 4 ) ), std::streampos( 4 ) );
 
     EXPECT_EQ( client.read( descriptor, payload2.data(), payload2.size() ), 9 );
 
     EXPECT_EQ( payload2, reference2 );
+
+    EXPECT_EQ( client.read( descriptor, payload2.data(), payload2.size() ), 1 );
+
+    const auto& state3 = client.iostate( descriptor );
+
+    EXPECT_FALSE( state3.fail() );
+    EXPECT_FALSE( state3.bad() );
+    EXPECT_TRUE( state3.eof() );
 
 }

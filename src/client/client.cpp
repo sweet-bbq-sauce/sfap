@@ -33,6 +33,7 @@
 
 #include <client/client.hpp>
 #include <client/file_info.hpp>
+#include <client/io_state.hpp>
 #include <net/address/address.hpp>
 #include <net/connect/connect.hpp>
 #include <net/iosocket/iosocket.hpp>
@@ -367,10 +368,9 @@ descriptor_t Client::open_descriptor( const virtual_path_t& path, std::ios::open
     // Receive new descriptor.
     const auto descriptor = _socket.recvo<descriptor_t>();
 
-    // Receive stream status flags (FAIL and EOF).
-    const auto fail = _socket.recvb();
-    const auto eof = _socket.recvb();
-    _cache.descriptors_flags[descriptor] = std::make_pair( fail, eof );
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
 
     return descriptor;
 
@@ -439,9 +439,9 @@ dword_t Client::write( descriptor_t descriptor, const void* data, dword_t size )
 
     }
 
-    // Receive stream status flags (FAIL and EOF).
-    _cache.descriptors_flags[descriptor].first = _socket.recvb();
-    _cache.descriptors_flags[descriptor].second = _socket.recvb();
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
 
     // Return writed size (temporary this way).
     return size;
@@ -493,9 +493,9 @@ dword_t Client::read( descriptor_t descriptor, void* data, dword_t size ) const 
 
     }
 
-    // Receive stream status flags (FAIL and EOF).
-    _cache.descriptors_flags[descriptor].first = _socket.recvb();
-    _cache.descriptors_flags[descriptor].second = _socket.recvb();
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
 
     // Finally copy payload from buffer to destination ...
     std::memcpy( data, payload.data(), payload.size() );
@@ -506,7 +506,7 @@ dword_t Client::read( descriptor_t descriptor, void* data, dword_t size ) const 
 }
 
 
-std::pair<bool, bool> Client::iostate( protocol::descriptor_t descriptor ) const {
+utils::IOState Client::iostate( protocol::descriptor_t descriptor ) const {
 
     _request_command( Command::IOSTATE );
 
@@ -523,12 +523,11 @@ std::pair<bool, bool> Client::iostate( protocol::descriptor_t descriptor ) const
 
     }
 
-    // Receive stream status flags (FAIL and EOF).
-    _cache.descriptors_flags[descriptor].first = _socket.recvb();
-    _cache.descriptors_flags[descriptor].second = _socket.recvb();
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
 
-    // Return stream state flags.
-    return _cache.descriptors_flags[descriptor];
+    return state;
 
 }
 
@@ -550,8 +549,13 @@ std::streampos Client::tellg( protocol::descriptor_t descriptor ) const {
 
     }
 
-    // Receive raw read pointer position from server and return it.
+    // Receive raw read pointer position from server.
     const auto raw = _socket.recvo<int64_t>();
+
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
+
     return ( raw == -1 ) ? std::streampos( -1 ) : std::streampos( raw );
 
 }
@@ -578,6 +582,11 @@ std::streampos Client::seekg( protocol::descriptor_t descriptor, std::streampos 
     _socket.sendo<int64_t>( ( position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( position ) );
 
     const auto actually_position = _socket.recvo<int64_t>();
+
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
+
     return ( actually_position == -1 ) ? std::streampos( -1 ) : std::streampos( actually_position );
 
 }
@@ -602,6 +611,11 @@ std::streampos Client::tellp( protocol::descriptor_t descriptor ) const {
 
     // Receive raw write pointer position from server and return it.
     const auto raw = _socket.recvo<int64_t>();
+
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
+
     return ( raw == -1 ) ? std::streampos( -1 ) : std::streampos( raw );
 
 }
@@ -628,6 +642,11 @@ std::streampos Client::seekp( protocol::descriptor_t descriptor, std::streampos 
     _socket.sendo<int64_t>( ( position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( position ) );
 
     const auto actually_position = _socket.recvo<int64_t>();
+
+    // Receive stream status flags and update it in cache.
+    const utils::IOState state( _socket.recvb() );
+    _cache.descriptors_flags[descriptor] = state;
+
     return ( actually_position == -1 ) ? std::streampos( -1 ) : std::streampos( actually_position );
 
 }

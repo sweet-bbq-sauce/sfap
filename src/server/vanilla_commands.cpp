@@ -36,6 +36,7 @@
 #include <thread>
 
 #include <client/file_info.hpp>
+#include <client/io_state.hpp>
 #include <net/address/address.hpp>
 #include <net/listener/listener.hpp>
 #include <server/command_registry/command_registry.hpp>
@@ -191,10 +192,10 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
         }
 
         // Open file with requested path.
-        std::fstream file( filesystem.to_system( result.value() ), mode );
+        std::fstream stream( filesystem.to_system( result.value() ), mode );
 
         // When file is not opened or stream is invalid abort command.
-        if ( !file.is_open() || file.fail() ) {
+        if ( !stream.is_open() || stream.fail() ) {
 
             // Send `AccessResult::CANT_OPEN_FILE` signalizing file can't be opened.
             socket.sende( AccessResult::CANT_OPEN_FILE );
@@ -206,11 +207,10 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             socket.sende( AccessResult::OK );
 
             // Register file in session and send it's descriptor to client.
-            socket.sendo( session.add_descriptor( file ) );
+            socket.sendo( session.add_descriptor( stream ) );
 
-            // Send stream status flags (FAIL and EOF).
-            socket.sendb( file.fail() );
-            socket.sendb( file.eof() );
+            // Send stream status flags.
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
         }
 
@@ -231,8 +231,8 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
         const auto requested_descriptor = socket.recvo<descriptor_t>();
         
         // Check if received descriptor is actually a opened descriptor.
-        const auto stream = session.get_stream( requested_descriptor );
-        if ( !stream ) {
+        const auto result = session.get_stream( requested_descriptor );
+        if ( !result ) {
 
             // If not found return error and abort command procedure.
             socket.sende( AccessResult::BAD_DESCRIPTOR );
@@ -259,18 +259,19 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
 
         }
 
+        auto& stream = result.value().get();
+
         // If integration is OK try to write payload to descriptor's stream.
-        stream.value().get().write( reinterpret_cast<const char*>( payload.data() ), payload.size() );
+        stream.write( reinterpret_cast<const char*>( payload.data() ), payload.size() );
 
         // Flush data to stream.
-        stream.value().get().flush();
+        stream.flush();
 
         // Send success result.
         socket.sende( FileStreamResult::OK );
 
-        // Send stream status flags (FAIL and EOF).
-        socket.sendb( stream.value().get().fail() );
-        socket.sendb( stream.value().get().eof() );
+        // Send stream status flags.
+        socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
     });
 
@@ -281,8 +282,8 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
         const auto requested_descriptor = socket.recvo<descriptor_t>();
         
         // Check if received descriptor is actually a opened descriptor.
-        const auto stream = session.get_stream( requested_descriptor );
-        if ( !stream ) {
+        const auto result = session.get_stream( requested_descriptor );
+        if ( !result ) {
 
             // If not found return error and abort command procedure.
             socket.sende( AccessResult::BAD_DESCRIPTOR );
@@ -299,23 +300,24 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
         // Allocate buffer for payload.
         data_t payload( requested_size );
 
+        auto& stream = result->get();
+
         // Read from stream to payload buffer.
-        stream.value().get().read( reinterpret_cast<char*>( payload.data() ), payload.size() );
+        stream.read( reinterpret_cast<char*>( payload.data() ), payload.size() );
 
         // Send OK status.
         socket.sende( FileStreamResult::OK );
 
         // Send actually read payload ...
-        const auto actually_read = static_cast<dword_t>( stream.value().get().gcount() );
+        const auto actually_read = static_cast<dword_t>( stream.gcount() );
         socket.sendo( actually_read );
         socket.send( payload.data(), actually_read );
 
         // ... and it's CRC.
         socket.sendo( utils::CRC::data( payload.data(), actually_read ) );
 
-        // Send stream status flags (FAIL and EOF).
-        socket.sendb( stream.value().get().fail() );
-        socket.sendb( stream.value().get().eof() );
+        // Send stream status flags.
+        socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
     });
 
@@ -334,9 +336,8 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             socket.sende( AccessResult::OK );
 
             // ... and send stream state flags.
-            const auto& stream = result.value().get();
-            socket.sendb( stream.fail() );
-            socket.sendb( stream.eof() );
+            const auto& stream = result->get();
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
         }
         else {
@@ -362,9 +363,12 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             // If found, send `AccessResult::OK` ...
             socket.sende( AccessResult::OK );
 
-            // Send read pointer position to client.
+            // Send read pointer position to client ...
             auto& stream = result.value().get();
             socket.sendo( static_cast<int64_t>( stream.tellg() ) );
+
+            // ... and send stream state flags.
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
         }
         else {
@@ -402,6 +406,9 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             const auto actually_position = stream.tellg();
             socket.sendo<int64_t>( ( actually_position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( actually_position ) );
 
+            // Send stream state flags.
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
+
         }
         else {
 
@@ -429,6 +436,9 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             // Send write pointer position to client.
             auto& stream = result.value().get();
             socket.sendo( static_cast<int64_t>( stream.tellp() ) );
+
+            // Send stream state flags.
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
         }
         else {
@@ -465,6 +475,9 @@ const CommandRegistry protocol::vanilla_commands = ( []() -> CommandRegistry {
             // Send actually write pointer position to client.
             const auto actually_position = stream.tellp();
             socket.sendo<int64_t>( ( actually_position == std::streampos( -1 ) ) ? -1 : static_cast<int64_t>( actually_position ) );
+
+            // Send stream state flags.
+            socket.sendb( utils::IOState( stream.fail(), stream.bad(), stream.eof() ).serialize() );
 
         }
         else {
