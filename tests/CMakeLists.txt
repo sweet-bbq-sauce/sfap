@@ -138,3 +138,8 @@ add_test( NAME ToHex COMMAND to_hex )
 add_executable( hash hash.cpp )
 target_link_libraries( hash sfap GTest::GTest GTest::Main )
 add_test( NAME Hash COMMAND hash )
+
+# Transfer from memory source
+add_executable( transfer_source_memory transfer_source_memory.cpp )
+target_link_libraries( transfer_source_memory sfap GTest::GTest GTest::Main )
+add_test( NAME TransferSourceMemory COMMAND transfer_source_memory )

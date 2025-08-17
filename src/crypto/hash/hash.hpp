@@ -57,10 +57,10 @@ namespace sfap {
          */
         enum class HashAlgorithm : byte_t {
 
-            MD5,    ///< MD5 algorithm (128-bit).
-            SHA1,   ///< SHA-1 algorithm (160-bit).
-            SHA256, ///< SHA-256 algorithm (256-bit).
-            SHA512  ///< SHA-512 algorithm (512-bit).
+            MD5 = 0x01,     ///< MD5 algorithm (128-bit).
+            SHA1 = 0x02,    ///< SHA-1 algorithm (160-bit).
+            SHA256 = 0x03,  ///< SHA-256 algorithm (256-bit).
+            SHA512 = 0x04   ///< SHA-512 algorithm (512-bit).
 
         };
 
