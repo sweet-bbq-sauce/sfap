@@ -32,7 +32,7 @@
 #include <stdexcept>
 
 #include <sfap.hpp>
-#include <protocol/transfer/source.hpp>
+#include <protocol/transfer/source/source.hpp>
 
 
 using namespace sfap;
@@ -52,6 +52,13 @@ TransferSource::TransferSource( dword_t chunk_size ) :
 }
 
 
+dword_t TransferSource::chunk_size() const noexcept {
+
+    return _chunk_size;
+
+}
+
+
 TransferSource::operator bool() const noexcept {
 
     return !eof();
@@ -59,78 +66,8 @@ TransferSource::operator bool() const noexcept {
 }
 
 
-TransferSourceMemory::TransferSourceMemory( const void* data, std::size_t size, dword_t chunk_size ) :
-    TransferSource( chunk_size ),
-    _data( data ),
-    _size( static_cast<qword_t>( size ) )
-{
+bool TransferSource::eof() const noexcept {
 
-    if ( _data == nullptr && size > 0 ) {
-
-        throw std::invalid_argument( "size must be 0 when data is null" );
-
-    }
-
-}
-
-
-qword_t TransferSourceMemory::size() const noexcept {
-
-    return _size;
-
-}
-
-
-qword_t TransferSourceMemory::remaining() const noexcept {
-
-    return ( _position <= _size ) ? ( _size - _position ) : 0;
-
-}
-
-
-qword_t TransferSourceMemory::tellg() const noexcept {
-
-    return _position;
-
-}
-
-
-void TransferSourceMemory::seekg( qword_t position ) {
-
-    if ( position > _size ) {
-
-        throw std::out_of_range( "too large position" );
-
-    }
-
-    _position = position;
-
-}
-
-
-std::pair<const void*, dword_t> TransferSourceMemory::get_chunk() noexcept {
-
-    const qword_t remaining_bytes = this->remaining();
-
-    if ( remaining_bytes == 0 ) {
-
-        return { nullptr, 0 };
-
-    }
-
-    const dword_t current_chunk_size = std::min( _chunk_size, static_cast<dword_t>( remaining_bytes ) );
-
-    const auto* base = static_cast<const byte_t*>( _data );
-    const auto* ptr  = base + static_cast<std::size_t>( _position );
-
-    _position += static_cast<qword_t>( current_chunk_size );
-    return { ptr, current_chunk_size };
-
-}
-
-
-bool TransferSourceMemory::eof() const noexcept {
-
-    return _position >= _size;
+    return remaining() == 0;
 
 }

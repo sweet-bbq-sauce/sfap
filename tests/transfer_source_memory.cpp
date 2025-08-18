@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include <crypto/hash/hash.hpp>
-#include <protocol/transfer/source.hpp>
+#include <protocol/transfer/source/memory.hpp>
 
 
 using namespace sfap;
@@ -292,5 +292,172 @@ TEST( TransferSourceMemoryTest, ReturnedPointerWithinOriginalBuffer ) {
     }
 
     EXPECT_EQ( consumed, total );
+
+}
+
+
+TEST( TransferSourceMemoryTest, ChunkSizeAccessorReturnsCtorValue ) {
+
+    const data_t data = make_pattern( 16 );
+    const dword_t chunk = 1024;
+
+    TransferSourceMemory src( data.data(), data.size(), chunk );
+    EXPECT_EQ( src.chunk_size(), chunk );
+
+}
+
+TEST( TransferSourceMemoryTest, PeekDoesNotAdvancePosition ) {
+
+    const std::size_t total = 3000;
+    const dword_t chunk = 1024;
+    const data_t data = make_pattern( total );
+    TransferSourceMemory src( data.data(), data.size(), chunk );
+
+    EXPECT_EQ( src.tellg(), 0u );
+    EXPECT_FALSE( src.eof() );
+
+    auto [p1, n1] = src.peek_chunk();
+    ASSERT_NE( p1, nullptr );
+    EXPECT_EQ( n1, chunk );
+    EXPECT_EQ( src.tellg(), 0u );
+    EXPECT_EQ( src.remaining(), total );
+
+    auto [p2, n2] = src.peek_chunk();
+    ASSERT_NE( p2, nullptr );
+    EXPECT_EQ( n2, chunk );
+    EXPECT_EQ( p2, p1 );
+    EXPECT_EQ( src.tellg(), 0u );
+
+    auto [p3, n3] = src.get_chunk();
+    ASSERT_NE( p3, nullptr );
+    EXPECT_EQ( n3, chunk );
+    EXPECT_EQ( p3, p1 );
+    EXPECT_EQ( src.tellg(), chunk );
+    EXPECT_EQ( src.remaining(), total - chunk );
+}
+
+TEST( TransferSourceMemoryTest, PeekThenGetAcrossBoundary ) {
+
+    const std::size_t total = 2500;
+    const dword_t chunk = 1024;
+    const data_t data = make_pattern( total );
+    TransferSourceMemory src( data.data(), data.size(), chunk );
+
+    (void)src.get_chunk();
+    EXPECT_EQ( src.tellg(), chunk );
+
+    auto [p2, n2] = src.peek_chunk();
+    ASSERT_NE( p2, nullptr );
+    EXPECT_EQ( n2, chunk );
+    EXPECT_EQ( src.tellg(), chunk );
+
+    auto [g2, gn2] = src.get_chunk();
+    EXPECT_EQ( g2, p2 );
+    EXPECT_EQ( gn2, n2 );
+    EXPECT_EQ( src.tellg(), 2 * chunk );
+
+    auto [p3, n3] = src.peek_chunk();
+    ASSERT_NE( p3, nullptr );
+    EXPECT_EQ( n3, static_cast<dword_t>( total - 2 * chunk ) );
+    EXPECT_EQ( src.tellg(), 2 * chunk );
+
+    auto [g3, gn3] = src.get_chunk();
+    EXPECT_EQ( g3, p3 );
+    EXPECT_EQ( gn3, n3 );
+
+    EXPECT_TRUE( src.eof() );
+    auto [p4, n4] = src.peek_chunk();
+    EXPECT_EQ( p4, nullptr );
+    EXPECT_EQ( n4, 0u );
+    EXPECT_EQ( src.tellg(), total );
+    
+}
+
+TEST( TransferSourceMemoryTest, RewindResetsToStartAndAllowsReread ) {
+
+    const std::size_t total = 4096 + 123;
+    const dword_t chunk = 1024;
+    const data_t data = make_pattern( total );
+    TransferSourceMemory src( data.data(), data.size(), chunk );
+
+    data_t first_pass = read_all_chunks( src );
+    EXPECT_TRUE( src.eof() );
+    EXPECT_EQ( first_pass.size(), total );
+
+    src.rewind();
+    EXPECT_FALSE( src.eof() );
+    EXPECT_EQ( src.tellg(), 0u );
+    EXPECT_EQ( src.remaining(), total );
+
+    data_t second_pass = read_all_chunks( src );
+    EXPECT_EQ( first_pass, second_pass );
+
+}
+
+
+TEST( TransferSourceMemoryTest, PeekAtEOFReturnsNullAndKeepsEOF ) {
+
+    const data_t data = make_pattern( 100 );
+    TransferSourceMemory src( data.data(), data.size(), static_cast<dword_t>( 256 ) );
+
+    (void)read_all_chunks( src );
+    EXPECT_TRUE( src.eof() );
+    EXPECT_EQ( src.remaining(), 0u );
+
+    auto [p, n] = src.peek_chunk();
+    EXPECT_EQ( p, nullptr );
+    EXPECT_EQ( n, 0u );
+    EXPECT_TRUE( src.eof() );
+    EXPECT_EQ( src.tellg(), src.size() );
+
+}
+
+
+TEST( TransferSourceMemoryTest, ChunkSizeRespectedOnAllReads ) {
+
+    const std::size_t total = 7000;
+    const dword_t chunk = 1024;
+    const data_t data = make_pattern( total );
+    TransferSourceMemory src( data.data(), data.size(), chunk );
+
+    for (int i = 0; i < 6; ++i) {
+        auto [p, n] = src.get_chunk();
+        ASSERT_NE( p, nullptr );
+        EXPECT_EQ( n, chunk );
+    }
+
+    auto [plast, nlast] = src.peek_chunk();
+    ASSERT_NE( plast, nullptr );
+    EXPECT_EQ( nlast, static_cast<dword_t>( total - 6 * chunk ) );
+
+    auto [glast, gnlast] = src.get_chunk();
+    EXPECT_EQ( glast, plast );
+    EXPECT_EQ( gnlast, nlast );
+
+    EXPECT_TRUE( src.eof() );
+
+}
+
+
+TEST( TransferSourceMemoryTest, SeekThenPeekThenGetConsistency ) {
+
+    const std::size_t total = 10'000;
+    const dword_t chunk = 4096;
+    const data_t data = make_pattern( total );
+    TransferSourceMemory src( data.data(), data.size(), chunk );
+
+    const qword_t pos = 1234;
+    src.seekg( pos );
+    EXPECT_EQ( src.tellg(), pos );
+
+    auto [p1, n1] = src.peek_chunk();
+    ASSERT_NE( p1, nullptr );
+
+    EXPECT_EQ( src.tellg(), pos );
+
+    auto [g1, gn1] = src.get_chunk();
+    EXPECT_EQ( g1, p1 );
+    EXPECT_EQ( gn1, n1 );
+    EXPECT_EQ( src.tellg(), pos + gn1 );
 
 }

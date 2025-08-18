@@ -58,6 +58,11 @@ namespace sfap {
                  */
                 explicit TransferSource( dword_t chunk_size );
 
+                TransferSource( const TransferSource& ) = delete;
+                TransferSource& operator=( const TransferSource& ) = delete;
+                TransferSource( TransferSource&& ) = default;
+                TransferSource& operator=( TransferSource&& ) = default;
+
                 /*!
                  *  \brief Virtual destructor.
                  */
@@ -68,6 +73,12 @@ namespace sfap {
                  *  \return Size of the data in bytes.
                  */
                 virtual qword_t size() const noexcept = 0;
+
+                /*!
+                 *  \brief Returns the chunk size.
+                 *  \return Size of the chunk in bytes.
+                 */
+                dword_t chunk_size() const noexcept;
 
                 /*!
                  *  \brief Returns the number of remaining bytes that can be read.
@@ -89,7 +100,12 @@ namespace sfap {
                 virtual void seekg( qword_t position ) = 0;
 
                 /*!
-                 *  \brief Returns a pointer to the next chunk of data.
+                 *  \brief Sets the current read position to begin.
+                 */
+                virtual void rewind() noexcept = 0;
+
+                /*!
+                 *  \brief Returns a pointer to the chunk of data.
                  *
                  *  Advances the read position by the chunk size or until the end of the data is reached.
                  *
@@ -100,10 +116,19 @@ namespace sfap {
                 [[nodiscard]] virtual std::pair<const void*, dword_t> get_chunk() noexcept = 0;
 
                 /*!
+                 *  \brief Returns a pointer to the chunk of data without moving read position to the next chunk.
+                 *
+                 *  \return A pair containing:
+                 *          - Pointer to the data chunk (may be nullptr if EOF),
+                 *          - Size of the chunk in bytes (0 if EOF).
+                 */
+                [[nodiscard]] virtual std::pair<const void*, dword_t> peek_chunk() noexcept = 0;
+
+                /*!
                  *  \brief Checks if the end of the data has been reached.
                  *  \return true if no more data is available, false otherwise.
                  */
-                virtual bool eof() const noexcept = 0;
+                bool eof() const noexcept;
 
                 /*!
                  *  \brief Checks if the data source is still valid for reading.
@@ -115,68 +140,6 @@ namespace sfap {
             protected:
 
                 const dword_t _chunk_size;  ///< Configured chunk size used in get_chunk().
-
-        };
-
-
-        /*!
-         *  \class TransferSourceMemory
-         *  \brief Concrete implementation of TransferSource for memory buffers.
-         *
-         *  Provides read access to a preallocated memory region in fixed-size chunks.
-         */
-        class TransferSourceMemory : public TransferSource {
-
-            public:
-
-                /*!
-                 *  \brief Constructs a TransferSourceMemory object.
-                 *
-                 *  \param data Pointer to the memory buffer (may be nullptr if size is 0).
-                 *  \param size Size of the buffer in bytes.
-                 *  \param chunk_size Size of each chunk to be returned by get_chunk().
-                 *
-                 *  \throws std::invalid_argument if \p data is nullptr and \p size > 0.
-                 *  \throws std::invalid_argument if \p chunk_size is 0.
-                 */
-                explicit TransferSourceMemory( const void* data, std::size_t size, dword_t chunk_size );
-
-                /*!
-                 *  \copydoc TransferSource::size()
-                 */
-                qword_t size() const noexcept override;
-
-                /*!
-                 *  \copydoc TransferSource::remaining()
-                 */
-                qword_t remaining() const noexcept override;
-
-                /*!
-                 *  \copydoc TransferSource::tellg()
-                 */
-                qword_t tellg() const noexcept override;
-
-                /*!
-                 *  \copydoc TransferSource::seekg()
-                 */
-                void seekg( qword_t position ) override;
-
-                /*!
-                 *  \copydoc TransferSource::get_chunk()
-                 */
-                [[nodiscard]] std::pair<const void*, dword_t> get_chunk() noexcept override;
-
-                /*!
-                 *  \copydoc TransferSource::eof()
-                 */
-                bool eof() const noexcept override;
-
-
-            private:
-
-                const void* const _data;    ///< Pointer to the beginning of the memory buffer.
-                const qword_t _size;        ///< Total size of the memory buffer in bytes.
-                qword_t _position = 0;      ///< Current read position in bytes.
 
         };
 
