@@ -39,15 +39,22 @@ using namespace sfap;
 using namespace sfap::protocol;
 
 
-TransferSource::TransferSource( dword_t chunk_size ) :
-    _chunk_size( chunk_size )
-{
+TransferSource::TransferSource( dword_t chunk_size ) {
 
-    if ( _chunk_size == 0 ) {
+    set_chunk_size( chunk_size );
+
+}
+
+
+void TransferSource::set_chunk_size( dword_t chunk_size ) {
+
+    if ( chunk_size == 0 ) {
 
         throw std::invalid_argument( "chunk size must be greater than 0" );
 
     }
+
+    _chunk_size = chunk_size;
 
 }
 

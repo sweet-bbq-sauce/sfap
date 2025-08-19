@@ -75,6 +75,12 @@ namespace sfap {
                 virtual qword_t size() const noexcept = 0;
 
                 /*!
+                 *  \brief Set chunk size.
+                 *  \throws `std::runtime_error` if `chunk_size` equals 0.
+                 */
+                void set_chunk_size( dword_t chunk_size );
+
+                /*!
                  *  \brief Returns the chunk size.
                  *  \return Size of the chunk in bytes.
                  */
@@ -139,7 +145,7 @@ namespace sfap {
 
             private:
 
-                const dword_t _chunk_size;  ///< Configured chunk size used in get_chunk().
+                dword_t _chunk_size;    ///< Configured chunk size used in get_chunk().
 
         };
 

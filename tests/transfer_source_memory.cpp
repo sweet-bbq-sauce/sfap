@@ -65,7 +65,7 @@ namespace {
 }
 
 
-TEST( TransferSourceMemoryTest, ConstructorThrowsOnZeroChunkSize ) {
+TEST( TransferSourceMemory, ConstructorThrowsOnZeroChunkSize ) {
 
     const data_t data = make_pattern( 16 );
 
@@ -77,7 +77,7 @@ TEST( TransferSourceMemoryTest, ConstructorThrowsOnZeroChunkSize ) {
 }
 
 
-TEST( TransferSourceMemoryTest, ConstructorAllowsEmptyBufferNullptr ) {
+TEST( TransferSourceMemory, ConstructorAllowsEmptyBufferNullptr ) {
 
     TransferSourceMemory src( nullptr, 0, static_cast<dword_t>( 1024 ) );
 
@@ -95,7 +95,7 @@ TEST( TransferSourceMemoryTest, ConstructorAllowsEmptyBufferNullptr ) {
 }
 
 
-TEST( TransferSourceMemoryTest, ConstructorThrowsOnNullWithPositiveSize ) {
+TEST( TransferSourceMemory, ConstructorThrowsOnNullWithPositiveSize ) {
 
     EXPECT_THROW(
         TransferSourceMemory( nullptr, 8, static_cast<dword_t>( 1024 ) ),
@@ -105,7 +105,7 @@ TEST( TransferSourceMemoryTest, ConstructorThrowsOnNullWithPositiveSize ) {
 }
 
 
-TEST( TransferSourceMemoryTest, SingleChunkWhenChunkSizeGreaterThanData ) {
+TEST( TransferSourceMemory, SingleChunkWhenChunkSizeGreaterThanData ) {
 
     const data_t data = make_pattern( 100 );
     TransferSourceMemory src( data.data(), data.size(), static_cast<dword_t>( 1024 ) );
@@ -126,7 +126,7 @@ TEST( TransferSourceMemoryTest, SingleChunkWhenChunkSizeGreaterThanData ) {
 }
 
 
-TEST( TransferSourceMemoryTest, MultipleExactChunks ) {
+TEST( TransferSourceMemory, MultipleExactChunks ) {
 
     const std::size_t total = 4096;
     const dword_t chunk = 1024;
@@ -159,7 +159,7 @@ TEST( TransferSourceMemoryTest, MultipleExactChunks ) {
 }
 
 
-TEST( TransferSourceMemoryTest, LastChunkSmallerThanChunkSize ) {
+TEST( TransferSourceMemory, LastChunkSmallerThanChunkSize ) {
 
     const std::size_t total = 2500;
     const dword_t chunk = 1024;
@@ -183,7 +183,7 @@ TEST( TransferSourceMemoryTest, LastChunkSmallerThanChunkSize ) {
 }
 
 
-TEST( TransferSourceMemoryTest, SeekgAndBounds ) {
+TEST( TransferSourceMemory, SeekgAndBounds ) {
 
     const std::size_t total = 3000;
     const dword_t chunk = 1024;
@@ -206,7 +206,7 @@ TEST( TransferSourceMemoryTest, SeekgAndBounds ) {
 }
 
 
-TEST( TransferSourceMemoryTest, RemainingEqualsSizeMinusTellg ) {
+TEST( TransferSourceMemory, RemainingEqualsSizeMinusTellg ) {
 
     const std::size_t total = 10000;
     const dword_t chunk = 4096;
@@ -225,7 +225,7 @@ TEST( TransferSourceMemoryTest, RemainingEqualsSizeMinusTellg ) {
 }
 
 
-TEST( TransferSourceMemoryTest, ReassembledDataMatchesOriginalByHash ) {
+TEST( TransferSourceMemory, ReassembledDataMatchesOriginalByHash ) {
 
     const std::size_t total = 7777;
     const dword_t chunk = 1024;
@@ -241,7 +241,7 @@ TEST( TransferSourceMemoryTest, ReassembledDataMatchesOriginalByHash ) {
 }
 
 
-TEST( TransferSourceMemoryTest, SeekThenHashSuffix ) {
+TEST( TransferSourceMemory, SeekThenHashSuffix ) {
 
     const std::size_t total = 5000;
     const dword_t chunk = 1000;
@@ -261,7 +261,7 @@ TEST( TransferSourceMemoryTest, SeekThenHashSuffix ) {
 }
 
 
-TEST( TransferSourceMemoryTest, ReturnedPointerWithinOriginalBuffer ) {
+TEST( TransferSourceMemory, ReturnedPointerWithinOriginalBuffer ) {
 
     const std::size_t total = 3500;
     const dword_t chunk = 1024;
@@ -296,7 +296,7 @@ TEST( TransferSourceMemoryTest, ReturnedPointerWithinOriginalBuffer ) {
 }
 
 
-TEST( TransferSourceMemoryTest, ChunkSizeAccessorReturnsCtorValue ) {
+TEST( TransferSourceMemory, ChunkSizeAccessorReturnsCtorValue ) {
 
     const data_t data = make_pattern( 16 );
     const dword_t chunk = 1024;
@@ -306,7 +306,7 @@ TEST( TransferSourceMemoryTest, ChunkSizeAccessorReturnsCtorValue ) {
 
 }
 
-TEST( TransferSourceMemoryTest, PeekDoesNotAdvancePosition ) {
+TEST( TransferSourceMemory, PeekDoesNotAdvancePosition ) {
 
     const std::size_t total = 3000;
     const dword_t chunk = 1024;
@@ -336,7 +336,7 @@ TEST( TransferSourceMemoryTest, PeekDoesNotAdvancePosition ) {
     EXPECT_EQ( src.remaining(), total - chunk );
 }
 
-TEST( TransferSourceMemoryTest, PeekThenGetAcrossBoundary ) {
+TEST( TransferSourceMemory, PeekThenGetAcrossBoundary ) {
 
     const std::size_t total = 2500;
     const dword_t chunk = 1024;
@@ -373,7 +373,7 @@ TEST( TransferSourceMemoryTest, PeekThenGetAcrossBoundary ) {
     
 }
 
-TEST( TransferSourceMemoryTest, RewindResetsToStartAndAllowsReread ) {
+TEST( TransferSourceMemory, RewindResetsToStartAndAllowsReread ) {
 
     const std::size_t total = 4096 + 123;
     const dword_t chunk = 1024;
@@ -395,7 +395,7 @@ TEST( TransferSourceMemoryTest, RewindResetsToStartAndAllowsReread ) {
 }
 
 
-TEST( TransferSourceMemoryTest, PeekAtEOFReturnsNullAndKeepsEOF ) {
+TEST( TransferSourceMemory, PeekAtEOFReturnsNullAndKeepsEOF ) {
 
     const data_t data = make_pattern( 100 );
     TransferSourceMemory src( data.data(), data.size(), static_cast<dword_t>( 256 ) );
@@ -413,7 +413,7 @@ TEST( TransferSourceMemoryTest, PeekAtEOFReturnsNullAndKeepsEOF ) {
 }
 
 
-TEST( TransferSourceMemoryTest, ChunkSizeRespectedOnAllReads ) {
+TEST( TransferSourceMemory, ChunkSizeRespectedOnAllReads ) {
 
     const std::size_t total = 7000;
     const dword_t chunk = 1024;
@@ -439,7 +439,7 @@ TEST( TransferSourceMemoryTest, ChunkSizeRespectedOnAllReads ) {
 }
 
 
-TEST( TransferSourceMemoryTest, SeekThenPeekThenGetConsistency ) {
+TEST( TransferSourceMemory, SeekThenPeekThenGetConsistency ) {
 
     const std::size_t total = 10'000;
     const dword_t chunk = 4096;
@@ -459,5 +459,44 @@ TEST( TransferSourceMemoryTest, SeekThenPeekThenGetConsistency ) {
     EXPECT_EQ( g1, p1 );
     EXPECT_EQ( gn1, n1 );
     EXPECT_EQ( src.tellg(), pos + gn1 );
+
+}
+
+
+TEST( TransferSourceMemory, DynamicChunkSizeMidStream ) {
+
+    const std::size_t total = 5000;
+    data_t data = make_pattern( total );
+
+    TransferSourceMemory src( data.data(), data.size(), 1024 );
+
+    auto [p1, n1] = src.get_chunk();
+    ASSERT_NE( p1, nullptr );
+    EXPECT_EQ( n1, 1024u );
+    EXPECT_EQ( src.tellg(), 1024u );
+
+    src.set_chunk_size( 256 );
+    EXPECT_EQ( src.chunk_size(), 256u );
+
+    auto [p2, n2] = src.get_chunk();
+    ASSERT_NE( p2, nullptr );
+    EXPECT_EQ( n2, 256u );
+    EXPECT_EQ( src.tellg(), 1024u + 256u );
+
+    src.set_chunk_size( 777 );
+    std::vector<byte_t> rebuilt;
+    rebuilt.insert( rebuilt.end(), static_cast<const byte_t*>( p1 ), static_cast<const byte_t*>( p1 ) + n1 );
+    rebuilt.insert( rebuilt.end(), static_cast<const byte_t*>( p2 ), static_cast<const byte_t*>( p2 ) + n2 );
+
+    while ( true ) {
+
+        auto [p, n] = src.get_chunk();
+        if (n == 0) break;
+        rebuilt.insert( rebuilt.end(), static_cast<const byte_t*>( p ), static_cast<const byte_t*>( p ) + n );
+
+    }
+
+    ASSERT_EQ( rebuilt.size(), total );
+    EXPECT_TRUE( std::equal( rebuilt.begin(), rebuilt.end(), data.begin() ) );
 
 }

@@ -104,3 +104,53 @@ TEST( TransferSourceFile, WindowClampAndPeekGetConsistency ) {
     std::filesystem::remove( path );
 
 }
+
+
+TEST( TransferSourceFile, DynamicChunkSizeResizesInternalBufferAndClamps ) {
+
+    const std::size_t total = 6000;
+    const std::size_t begin = 100;
+    const qword_t window = 5000;
+
+    auto data = make_pattern( total );
+    auto path = write_temp_file( data );
+    std::ifstream f( path, std::ios::binary );
+    ASSERT_TRUE( f.is_open() );
+
+    f.seekg( static_cast<std::streamoff>( begin ), std::ios::beg );
+    TransferSourceFile src( f, 2048, window );
+    ASSERT_EQ( src.size(), window );
+
+    auto [p1, n1] = src.get_chunk();
+    ASSERT_NE( p1, nullptr );
+    EXPECT_EQ( n1, 2048u );
+    EXPECT_EQ( src.tellg(), 2048u );
+
+    src.set_chunk_size( 1000 );
+    EXPECT_EQ( src.chunk_size(), 1000u );
+
+    std::vector<byte_t> rebuilt;
+    rebuilt.insert( rebuilt.end(), static_cast<const byte_t*>( p1 ), static_cast<const byte_t*>( p1 ) + n1 );
+
+    while ( src.remaining() > 1000 ) {
+
+        auto [p, n] = src.get_chunk();
+        ASSERT_NE( p, nullptr );
+        EXPECT_EQ( n, 1000u );
+        rebuilt.insert( rebuilt.end(), static_cast<const byte_t*>( p ), static_cast<const byte_t*>( p ) + n );
+
+    }
+
+    auto [plast, nlast] = src.get_chunk();
+    ASSERT_NE( plast, nullptr );
+    EXPECT_EQ( nlast, static_cast<dword_t>( src.size() - ( 2048u + 1000u * ( ( window - 2048u ) / 1000u ) ) ) );
+    rebuilt.insert( rebuilt.end(), static_cast<const byte_t*>( plast ), static_cast<const byte_t*>( plast ) + nlast );
+
+    EXPECT_TRUE( src.eof() );
+    ASSERT_EQ( rebuilt.size(), static_cast<std::size_t>( window ) );
+    EXPECT_TRUE( std::equal( rebuilt.begin(), rebuilt.end(), data.begin() + begin ) );
+
+    f.close();
+    std::filesystem::remove( path );
+
+}

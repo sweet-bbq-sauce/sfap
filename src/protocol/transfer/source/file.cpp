@@ -91,7 +91,7 @@ TransferSourceFile::TransferSourceFile( std::ifstream& file, dword_t chunk_size,
         }
 
     })() ),
-    _buffer( this->chunk_size() )
+    _buffer( static_cast<std::size_t>( this->chunk_size() ) )
 {}
 
 
@@ -141,6 +141,12 @@ std::pair<const void*, dword_t> TransferSourceFile::peek_chunk() {
     if ( eof() ) {
 
         return { nullptr, 0 };
+
+    }
+
+    if ( chunk_size() != _buffer.size() ) {
+
+        _buffer.resize( static_cast<std::size_t>( chunk_size() ) );
 
     }
 
