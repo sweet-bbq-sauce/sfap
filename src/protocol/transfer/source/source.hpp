@@ -113,7 +113,7 @@ namespace sfap {
                  *          - Pointer to the data chunk (may be nullptr if EOF),
                  *          - Size of the chunk in bytes (0 if EOF).
                  */
-                [[nodiscard]] virtual std::pair<const void*, dword_t> get_chunk() noexcept = 0;
+                [[nodiscard]] virtual std::pair<const void*, dword_t> get_chunk() = 0;
 
                 /*!
                  *  \brief Returns a pointer to the chunk of data without moving read position to the next chunk.
@@ -122,7 +122,7 @@ namespace sfap {
                  *          - Pointer to the data chunk (may be nullptr if EOF),
                  *          - Size of the chunk in bytes (0 if EOF).
                  */
-                [[nodiscard]] virtual std::pair<const void*, dword_t> peek_chunk() noexcept = 0;
+                [[nodiscard]] virtual std::pair<const void*, dword_t> peek_chunk() = 0;
 
                 /*!
                  *  \brief Checks if the end of the data has been reached.
@@ -137,7 +137,7 @@ namespace sfap {
                 explicit operator bool() const noexcept;
 
 
-            protected:
+            private:
 
                 const dword_t _chunk_size;  ///< Configured chunk size used in get_chunk().
 

@@ -95,17 +95,16 @@ void TransferSourceMemory::rewind() noexcept {
 }
 
 
-std::pair<const void*, dword_t> TransferSourceMemory::peek_chunk() noexcept {
+std::pair<const void*, dword_t> TransferSourceMemory::peek_chunk() {
 
-    const qword_t remaining_bytes = remaining();
-
-    if ( remaining_bytes == 0 ) {
+    if ( eof() ) {
 
         return { nullptr, 0 };
 
     }
 
-    const dword_t current_chunk_size = static_cast<dword_t>( std::min( static_cast<qword_t>( _chunk_size ),  remaining_bytes ) );
+    const qword_t remaining_bytes = remaining();
+    const dword_t current_chunk_size = static_cast<dword_t>( std::min( static_cast<qword_t>( chunk_size() ),  remaining_bytes ) );
 
     const auto* base = static_cast<const byte_t*>( _data );
     const auto* ptr  = base + static_cast<std::size_t>( _position );
@@ -115,7 +114,7 @@ std::pair<const void*, dword_t> TransferSourceMemory::peek_chunk() noexcept {
 }
 
 
-std::pair<const void*, dword_t> TransferSourceMemory::get_chunk() noexcept {
+std::pair<const void*, dword_t> TransferSourceMemory::get_chunk() {
 
     const auto result = peek_chunk();
 

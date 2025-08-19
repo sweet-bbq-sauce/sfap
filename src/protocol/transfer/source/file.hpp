@@ -1,6 +1,6 @@
 /*!
  *  \file
- *  \brief Transfer from memory source types declarations.
+ *  \brief Transfer from file source types declarations.
  *
  *  \copyright Copyright (c) 2025 Wiktor Sołtys
  *
@@ -31,6 +31,9 @@
 #pragma once
 
 
+#include <fstream>
+#include <optional>
+
 #include <sfap.hpp>
 #include <protocol/transfer/source/source.hpp>
 
@@ -41,31 +44,28 @@ namespace sfap {
 
 
         /*!
-         *  \class TransferSourceMemory
-         *  \brief Concrete implementation of TransferSource for memory buffers.
+         *  \class TransferSourceFile
+         *  \brief Concrete implementation of TransferSource for file.
          *
-         *  Provides read access to a preallocated memory region in fixed-size chunks.
+         *  Provides read access to a preopened input file stream in fixed-size chunks.
+         * 
+         *  \note File stream must be opened with `binary` flag.
          */
-        class TransferSourceMemory : public TransferSource {
+        class TransferSourceFile : public TransferSource {
 
             public:
 
                 /*!
-                 *  \brief Constructs a TransferSourceMemory object.
+                 *  \brief Constructs a TransferSourceFile object.
                  *
-                 *  \param data Pointer to the memory buffer (may be nullptr if size is 0).
-                 *  \param size Size of the buffer in bytes.
-                 *  \param chunk_size Size of each chunk to be returned by get_chunk().
-                 *
-                 *  \throws std::invalid_argument if \p data is nullptr and \p size > 0.
                  *  \throws std::invalid_argument if \p chunk_size is 0.
                  */
-                explicit TransferSourceMemory( const void* data, std::size_t size, dword_t chunk_size );
+                explicit TransferSourceFile( std::ifstream& file, dword_t chunk_size, std::optional<qword_t> size = std::nullopt );
 
-                TransferSourceMemory( const TransferSourceMemory& ) = delete;
-                TransferSourceMemory& operator=( const TransferSourceMemory& ) = delete;
-                TransferSourceMemory( TransferSourceMemory&& ) = default;
-                TransferSourceMemory& operator=( TransferSourceMemory&& ) = default;
+                TransferSourceFile( const TransferSourceFile& ) = delete;
+                TransferSourceFile& operator=( const TransferSourceFile& ) = delete;
+                TransferSourceFile( TransferSourceFile&& ) = default;
+                TransferSourceFile& operator=( TransferSourceFile&& ) = default;
 
                 /*!
                  *  \copydoc TransferSource::size()
@@ -105,9 +105,11 @@ namespace sfap {
 
             private:
 
-                const void* const _data;    ///< Pointer to the beginning of the memory buffer.
-                const qword_t _size;        ///< Total size of the memory buffer in bytes.
-                qword_t _position = 0;      ///< Current read position in bytes.
+                std::ifstream& _file;
+                const std::streampos _begin;
+                std::streamoff _position;
+                const qword_t _size;
+                mutable data_t _buffer;
 
         };
 

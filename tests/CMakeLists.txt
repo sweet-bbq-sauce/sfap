@@ -143,3 +143,8 @@ add_test( NAME Hash COMMAND hash )
 add_executable( transfer_source_memory transfer_source_memory.cpp )
 target_link_libraries( transfer_source_memory sfap GTest::GTest GTest::Main )
 add_test( NAME TransferSourceMemory COMMAND transfer_source_memory )
+
+# Transfer from file source
+add_executable( transfer_source_file transfer_source_file.cpp )
+target_link_libraries( transfer_source_file sfap GTest::GTest GTest::Main )
+add_test( NAME TransferSourceFile COMMAND transfer_source_file )
