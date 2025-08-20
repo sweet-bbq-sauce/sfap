@@ -140,7 +140,41 @@ namespace sfap {
                  *  \return Computed digest.
                  *  \throws std::runtime_error if the file cannot be opened.
                  */
-                static data_t hash_file( HashAlgorithm algorithm, const path_t& path );
+                static data_t hash_file( HashAlgorithm algorithm, const path_t& path, std::size_t buffer_size = 4096 );
+
+                /*!
+                 *  \brief Compute a cryptographic hash over a window of an input stream.
+                 *
+                 *  \details
+                 *  Hashes the byte sequence in \p input starting at the current get position and spanning
+                 *  either \p size bytes (if provided) or up to end-of-stream. The function determines the
+                 *  available window using \c tellg() / \c seekg(), then reads in chunks of \p buffer_size
+                 *  without allocating more than that temporary buffer.
+                 *
+                 *  The stream must be seekable and in a good state on entry. The function clears the stream’s
+                 *  error flags and seeks back to the starting position before reading. It does **not** restore
+                 *  the original position afterwards; on return, the get position is advanced by the number of
+                 *  bytes hashed.
+                 *
+                 *  \param algorithm    Hash algorithm to use (e.g. \c HashAlgorithm::SHA256).
+                 *  \param input        Input stream to read from. Open it in binary mode if you need byte-exact hashing.
+                 *  \param size         Optional number of bytes to hash from the current position. If \c std::nullopt,
+                 *                      the function hashes until EOF from the current position.
+                 *  \param buffer_size  Size (in bytes) of the internal read buffer. Must be > 0.
+                 *
+                 *  \return The computed hash as a byte vector (\c data_t).
+                 *
+                 *  \throws std::runtime_error
+                 *          If the stream is invalid or not seekable; if the computed range is negative; if
+                 *          \p size exceeds the available bytes to EOF starting at the current position; or
+                 *          on short read errors while consuming the stream.
+                 *
+                 *  \pre \p input is a seekable stream; \p buffer_size > 0.
+                 *  \post The stream’s get position is advanced by \p size bytes (or to EOF if \p size is \c std::nullopt).
+                 *
+                 *  \note This function does not close the stream and does not modify its formatting flags.
+                 */
+                static data_t hash_stream( HashAlgorithm algorithm, std::istream& input, std::optional<qword_t> size = std::nullopt, std::size_t buffer_size = 4096 );
 
 
             private:

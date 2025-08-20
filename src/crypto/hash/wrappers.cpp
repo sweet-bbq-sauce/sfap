@@ -72,7 +72,7 @@ data_t Hash::hash_data( HashAlgorithm algorithm, const std::string& data ) {
 }
 
 
-data_t Hash::hash_file( HashAlgorithm algorithm, const path_t& path ) {
+data_t Hash::hash_file( HashAlgorithm algorithm, const path_t& path, std::size_t buffer_size ) {
 
     std::ifstream input( path, std::ios::binary );
 
@@ -83,16 +83,72 @@ data_t Hash::hash_file( HashAlgorithm algorithm, const path_t& path ) {
     }
 
     Hash hash( algorithm );
-    char buffer[4096];
+    std::vector<char> buffer( buffer_size );
 
     while ( !input.eof() ) {
 
-        input.read( buffer, sizeof( buffer ) );
+        input.read( buffer.data(), sizeof( buffer.size() ) );
 
-        hash.update( buffer, static_cast<std::size_t>( input.gcount() ) );
+        hash.update( buffer.data(), static_cast<std::size_t>( input.gcount() ) );
 
     }
 
     return hash.finish();
                     
+}
+
+
+data_t Hash::hash_stream( HashAlgorithm algorithm, std::istream& input, std::optional<qword_t> size, std::size_t buffer_size ) {
+
+    const auto begin = input.tellg();
+    if ( begin == std::streampos( -1 ) ) throw std::runtime_error( "bad stream" );
+
+    input.seekg( 0, std::ios::end );
+    const auto end = input.tellg();
+    if ( end == std::streampos( -1 ) ) throw std::runtime_error( "bad stream" );
+
+    const std::streamoff diff = end - begin;
+
+    if ( diff < 0 ) throw std::runtime_error( "negative range" );
+
+    qword_t remaining;
+
+    if ( size ) {
+
+        if ( *size > static_cast<qword_t>( diff ) ) {
+
+            throw std::runtime_error( "too high size for this stream" );
+
+        }
+
+        remaining = *size;
+
+    } else {
+
+        remaining = static_cast<qword_t>( diff );
+
+    }
+
+    input.clear();
+    input.seekg( begin );
+
+    std::vector<char> buffer( buffer_size );
+    Hash hash( algorithm );
+
+    while ( remaining > 0 ) {
+
+        const std::streamsize want = static_cast<std::streamsize>( std::min<qword_t>( remaining, buffer.size() ) );
+
+        input.read( buffer.data(), want );
+        const std::streamsize got = input.gcount();
+
+        if ( got <= 0 ) throw std::runtime_error( "short read" );
+
+        hash.update( buffer.data(), static_cast<std::size_t>( got ) );
+        remaining -= static_cast<qword_t>( got );
+
+    }
+
+    return hash.finish();
+
 }
