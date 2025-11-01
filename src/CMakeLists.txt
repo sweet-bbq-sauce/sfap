@@ -1,6 +1,4 @@
-set( SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/test.cpp"
-)
+add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/utils" )
 
 add_library( sfap ${SOURCES} )
 

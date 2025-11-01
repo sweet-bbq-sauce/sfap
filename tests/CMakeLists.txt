@@ -20,7 +20,7 @@ function ( add_gtest name )
 endfunction ()
 
 set( TESTS
-    "init"
+    "ringbuffer"
 )
 
 foreach ( t IN LISTS TESTS )

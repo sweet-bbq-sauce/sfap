@@ -9,6 +9,10 @@ set( CMAKE_CXX_EXTENSIONS OFF )
 include( "${CMAKE_SOURCE_DIR}/cmake/doxygen.cmake" )
 include( "${CMAKE_SOURCE_DIR}/cmake/sanitizers.cmake" )
 
+if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
+    add_compile_options( -Wno-psabi )
+endif()
+
 include_directories( "${CMAKE_SOURCE_DIR}/include" )
 
 add_subdirectory( "${CMAKE_SOURCE_DIR}/src" )
