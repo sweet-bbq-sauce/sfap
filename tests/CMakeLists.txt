@@ -10,6 +10,7 @@ set( BUILD_GMOCK OFF CACHE BOOL "" FORCE )
 set( BUILD_GTEST ON  CACHE BOOL "" FORCE )
 set( INSTALL_GTEST OFF CACHE BOOL "" FORCE )
 
+add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/net" )
 add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/utils" )
 
 FetchContent_MakeAvailable( googletest )
