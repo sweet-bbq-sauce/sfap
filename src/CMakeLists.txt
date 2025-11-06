@@ -26,6 +26,11 @@ if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
     target_compile_options( sfap PRIVATE -fno-exceptions -fno-rtti -Wall -Wextra -Wpedantic -Werror )
 endif ()
 
+if ( MSVC )
+    target_compile_options( sfap PRIVATE /GR- /W4 /WX /permissive- )
+    target_compile_definitions( sfap PRIVATE PRIVATE_HAS_EXCEPTIONS=0 )
+endif()
+
 if ( WIN32 )
     target_link_libraries( sfap PRIVATE ws2_32 )
 endif ()
