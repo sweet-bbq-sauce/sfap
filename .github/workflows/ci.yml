@@ -13,11 +13,14 @@ jobs:
       matrix: { cc: [gcc, clang] }
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ clang
+      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++-13 clang
       - name: Configure
         run: |
-          if [[ "${{ matrix.cc }}" == "gcc" ]]; then export CC=gcc CXX=g++; else export CC=clang CXX=clang++; fi
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSFAP_BUILD_TESTS=ON
+          if [[ "${{ matrix.cc }}" == "gcc" ]]; then
+            export CC=gcc CXX=g++;
+          else
+            export CC=clang CXX=clang++;
+          fi
       - name: Build & Test
         run: cmake --build build && ctest --test-dir build --output-on-failure
 

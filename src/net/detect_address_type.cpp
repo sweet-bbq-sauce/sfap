@@ -11,7 +11,6 @@
 */
 
 #include <array>
-#include <expected>
 #include <string_view>
 #include <system_error>
 
@@ -109,7 +108,7 @@ const auto is_fqdn = [](std::string_view s) noexcept -> bool {
 
 } // namespace
 
-std::expected<sfap::net::AddressType, std::error_code>
+sfap::expected<sfap::net::AddressType, std::error_code>
 sfap::net::detect_address_type(const sfap::String& address) noexcept {
     if (address.empty())
         return AddressType::EMPTY;

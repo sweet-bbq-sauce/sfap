@@ -12,10 +12,10 @@
 
 #pragma once
 
-#include <expected>
 #include <system_error>
 
 #include <sfap/net/net.hpp>
+#include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
 
 namespace sfap {
@@ -39,7 +39,7 @@ namespace net {
 
     \note Function is \c noexcept; errors are reported via \c std::error_code.
 */
-std::expected<AddressType, std::error_code> detect_address_type(const String& address) noexcept;
+sfap::expected<AddressType, std::error_code> detect_address_type(const String& address) noexcept;
 
 } // namespace net
 } // namespace sfap
