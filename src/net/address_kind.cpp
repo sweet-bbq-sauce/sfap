@@ -1,6 +1,6 @@
 /*!
   \file
-  \brief `detect_address_type` implementation.
+  \brief Detecting and storing address kind implementation.
 
   \details
   Detects the type of a textual network address.
@@ -27,8 +27,8 @@
 #include <netinet/in.h>
 #endif
 
-#include <sfap/net/detect_address_type.hpp>
-#include <sfap/net/net.hpp>
+#include <sfap/net/address_kind.hpp>
+#include <sfap/net/types.hpp>
 #include <sfap/utils/string.hpp>
 
 namespace {
@@ -108,29 +108,29 @@ const auto is_fqdn = [](std::string_view s) noexcept -> bool {
 
 } // namespace
 
-sfap::expected<sfap::net::AddressType, std::error_code>
-sfap::net::detect_address_type(const sfap::String& address) noexcept {
+sfap::expected<sfap::net::AddressKind, std::error_code>
+sfap::net::detect_address_kind(const sfap::String& address) noexcept {
     if (address.empty())
-        return AddressType::EMPTY;
+        return AddressKind::EMPTY;
     if (address.size() > 254)
-        return AddressType::UNKNOWN;
+        return AddressKind::UNKNOWN;
 
     alignas(in6_addr) std::array<std::byte, sizeof(in6_addr)> sink;
 
     const int ip4_test_result = ::inet_pton(AF_INET, address.c_str(), sink.data());
     if (ip4_test_result == 1)
-        return AddressType::IP4;
+        return AddressKind::IP4;
     else if (ip4_test_result == -1)
         return std::unexpected(last_net_error());
 
     const int ip6_test_result = ::inet_pton(AF_INET6, address.c_str(), sink.data());
     if (ip6_test_result == 1)
-        return AddressType::IP6;
+        return AddressKind::IP6;
     else if (ip6_test_result == -1)
         return std::unexpected(last_net_error());
 
     if (is_fqdn(address.view()))
-        return AddressType::HOSTNAME;
+        return AddressKind::HOSTNAME;
 
-    return net::AddressType::UNKNOWN;
+    return net::AddressKind::UNKNOWN;
 }

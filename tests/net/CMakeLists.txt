@@ -1,5 +1,6 @@
 set( TESTS
     ${TESTS}
-    "${CMAKE_CURRENT_SOURCE_DIR}/detect_address_type.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/detect_address_kind.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/types.cpp"
     PARENT_SCOPE
 )
