@@ -223,3 +223,158 @@ TEST(Buffer, FullEmptyFree) {
     EXPECT_TRUE(b.full());
     EXPECT_EQ(b.free(), 0u);
 }
+
+static std::vector<std::byte> B(std::initializer_list<unsigned> xs) {
+    std::vector<std::byte> v;
+    v.reserve(xs.size());
+    for (auto x : xs)
+        v.push_back(std::byte(x & 0xFFu));
+    return v;
+}
+
+TEST(Buffer, EmptySourceCleans) {
+    Buffer b{8};
+
+    EXPECT_TRUE(b.push_back(std::byte{0xAA}));
+    EXPECT_EQ(b.size(), 1u);
+
+    std::span<const std::byte> empty{};
+    EXPECT_TRUE(b.assign(empty));
+    EXPECT_EQ(b.size(), 0u);
+}
+
+TEST(Buffer, FitsExactlyAndCopies) {
+    Buffer b{4};
+
+    auto src = B({0x10, 0x20, 0x30, 0x40});
+    EXPECT_TRUE(b.assign(src));
+    EXPECT_EQ(b.size(), 4u);
+    auto v = b.view();
+    ASSERT_EQ(v.size(), 4u);
+    EXPECT_EQ(v[0], std::byte{0x10});
+    EXPECT_EQ(v[1], std::byte{0x20});
+    EXPECT_EQ(v[2], std::byte{0x30});
+    EXPECT_EQ(v[3], std::byte{0x40});
+}
+
+TEST(Buffer, TooLargeRejectedSizeUnchanged) {
+    Buffer b{3};
+
+    EXPECT_TRUE(b.push_back(std::byte{0xAA}));
+    const auto prevSize = b.size();
+
+    auto src = B({1, 2, 3, 4});
+    EXPECT_FALSE(b.assign(src));
+    EXPECT_EQ(b.size(), prevSize);
+}
+
+TEST(Buffer, NullBufferRejects) {
+    Buffer b{0};
+
+    auto src = B({1});
+    EXPECT_FALSE(b.append(src));
+    EXPECT_EQ(b.size(), 0u);
+}
+
+TEST(Buffer, EmptySourceIsNoop) {
+    Buffer b{5};
+
+    EXPECT_TRUE(b.append({}));
+    EXPECT_EQ(b.size(), 0u);
+}
+
+TEST(Buffer, AccumulatesUntilCapacity) {
+    Buffer b{6};
+
+    auto a = B({1, 2, 3});
+    auto c = B({4, 5});
+    EXPECT_TRUE(b.append(a));
+    EXPECT_EQ(b.size(), 3u);
+    EXPECT_TRUE(b.append(c));
+    EXPECT_EQ(b.size(), 5u);
+    auto v = b.view();
+    ASSERT_EQ(v.size(), 5u);
+    EXPECT_EQ(v[0], std::byte{1});
+    EXPECT_EQ(v[1], std::byte{2});
+    EXPECT_EQ(v[2], std::byte{3});
+    EXPECT_EQ(v[3], std::byte{4});
+    EXPECT_EQ(v[4], std::byte{5});
+}
+
+TEST(Buffer, OverflowRejectedSizeUnchanged) {
+    Buffer b{4};
+
+    auto first = B({1, 2});
+    EXPECT_TRUE(b.append(first));
+    const auto prevSize = b.size();
+
+    auto tooBig = B({3, 4, 5});
+    EXPECT_FALSE(b.append(tooBig));
+    EXPECT_EQ(b.size(), prevSize);
+}
+
+TEST(Buffer, NullOrFull) {
+    Buffer nullBuf{0};
+    EXPECT_FALSE(nullBuf.push_back(std::byte{0xAA}));
+    EXPECT_EQ(nullBuf.size(), 0u);
+
+    Buffer b{2};
+    EXPECT_TRUE(b.push_back(std::byte{0x11}));
+    EXPECT_TRUE(b.push_back(std::byte{0x22}));
+    EXPECT_FALSE(b.push_back(std::byte{0x33})); // pełny
+    auto v = b.view();
+    ASSERT_EQ(v.size(), 2u);
+    EXPECT_EQ(v[0], std::byte{0x11});
+    EXPECT_EQ(v[1], std::byte{0x22});
+}
+
+TEST(Buffer, NullBufferReturnsNullopt) {
+    Buffer b{0};
+
+    auto sv = b.subview(0, 0);
+    EXPECT_FALSE(sv.has_value());
+    const Buffer& cb = b;
+    auto csv = cb.subview(0, 0);
+    EXPECT_FALSE(csv.has_value());
+}
+
+TEST(Buffer, InRangeAndOutOfRange) {
+    Buffer b{8};
+    auto src = B({10, 20, 30, 40, 50});
+    ASSERT_TRUE(b.assign(src));
+    ASSERT_EQ(b.size(), 5u);
+
+    auto sv = b.subview(1, 3);
+    ASSERT_TRUE(sv.has_value());
+    EXPECT_EQ(sv->size(), 3u);
+    EXPECT_EQ((*sv)[0], std::byte{20});
+    EXPECT_EQ((*sv)[1], std::byte{30});
+    EXPECT_EQ((*sv)[2], std::byte{40});
+
+    const Buffer& cb = b;
+    auto csv = cb.subview(2, 2);
+    ASSERT_TRUE(csv.has_value());
+    EXPECT_EQ(csv->size(), 2u);
+    EXPECT_EQ((*csv)[0], std::byte{30});
+    EXPECT_EQ((*csv)[1], std::byte{40});
+
+    EXPECT_FALSE(b.subview(4, 2).has_value());  // 4+2 > 5
+    EXPECT_FALSE(cb.subview(6, 0).has_value()); // from > size
+}
+
+TEST(Buffer, ZeroLengthViewsAreAllowedAtOrInsideSize) {
+    Buffer b{4};
+    auto src = B({1, 2, 3});
+    ASSERT_TRUE(b.assign(src));
+    ASSERT_EQ(b.size(), 3u);
+
+    auto sv1 = b.subview(1, 0);
+    ASSERT_TRUE(sv1.has_value());
+    EXPECT_EQ(sv1->size(), 0u);
+    EXPECT_EQ(sv1->data(), b.data() + 1);
+
+    auto sv2 = b.subview(3, 0);
+    ASSERT_TRUE(sv2.has_value());
+    EXPECT_EQ(sv2->size(), 0u);
+    EXPECT_EQ(sv2->data(), b.data() + 3);
+}

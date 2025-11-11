@@ -147,6 +147,52 @@ class Buffer {
     */
     std::optional<std::size_t> find(std::span<const std::byte> pattern, std::size_t from = 0) const noexcept;
 
+    /*!
+      \brief Replace buffer contents with \p source.
+      \param source Bytes to copy into the buffer.
+      \return true on success, false if buffer is null or \p source.size() > capacity().
+      \post size() == source.size() on success; unchanged on failure.
+      \note Copies raw bytes; does not allocate.
+      \details If \p source is empty, the buffer is cleared (size() becomes 0).
+    */
+    bool assign(std::span<const std::byte> source) noexcept;
+
+    /*!
+      \brief Append \p source to the end of current contents.
+      \param source Bytes to append.
+      \return true on success, false if buffer is null or size() + source.size() > capacity().
+      \post size() increased by \p source.size() on success; unchanged on failure.
+      \note No-op for an empty \p source.
+    */
+    bool append(std::span<const std::byte> source) noexcept;
+
+    /*!
+      \brief Append a single byte.
+      \param byte Value to push.
+      \return true on success, false if buffer is null or full().
+      \post size() increased by 1 on success; unchanged on failure.
+    */
+    bool push_back(std::byte byte) noexcept;
+
+    /*!
+      \brief Create a mutable subview of the stored bytes.
+      \param from Start index within [0, size()].
+      \param count Number of bytes in the view (default 0). May be 0 to create an empty view.
+      \return A span over [from, from + count) on success; std::nullopt if buffer is null or the range exceeds size().
+      \warning The returned span is invalidated by any operation that modifies the buffer’s storage or size.
+    */
+    std::optional<std::span<std::byte>> subview(std::size_t from, std::size_t count = 0) noexcept;
+
+    /*!
+      \brief Create a read-only subview of the stored bytes.
+      \param from Start index within [0, size()].
+      \param count Number of bytes in the view (default 0). May be 0 to create an empty view.
+      \return A const span over [from, from + count) on success; std::nullopt if buffer is null or the range exceeds
+              size().
+      \note The returned span aliases the underlying storage; no copy is made.
+    */
+    std::optional<std::span<const std::byte>> subview(std::size_t from, std::size_t count = 0) const noexcept;
+
   private:
     std::byte* data_{};      ///< Base pointer.
     std::size_t capacity_{}; ///< Capacity in bytes (power of two).

@@ -22,7 +22,7 @@
 #include <sfap/utils/buffer.hpp>
 
 sfap::Buffer::Buffer(std::size_t capacity) noexcept
-    : data_(capacity ? new(std::nothrow) std::byte[capacity] : nullptr), capacity_(data_ ? capacity : 0), owner_(true),
+    : data_(capacity ? new (std::nothrow) std::byte[capacity] : nullptr), capacity_(data_ ? capacity : 0), owner_(true),
       size_(0) {}
 
 sfap::Buffer::Buffer(std::span<std::byte> external) noexcept
@@ -174,4 +174,55 @@ std::optional<std::size_t> sfap::Buffer::find(std::span<const std::byte> pattern
     if (position == end())
         return std::nullopt;
     return position - begin();
+}
+
+bool sfap::Buffer::assign(std::span<const std::byte> source) noexcept {
+    if (!data_)
+        return false;
+    if (source.empty()) {
+        clean();
+        return true;
+    }
+    if (source.size() > capacity_)
+        return false;
+    std::memcpy(data_, source.data(), source.size());
+    return resize(source.size());
+}
+
+bool sfap::Buffer::append(std::span<const std::byte> source) noexcept {
+    if (!data_)
+        return false;
+    if (source.empty())
+        return true;
+    if (size_ + source.size() > capacity_)
+        return false;
+
+    std::memcpy(data_ + size_, source.data(), source.size());
+    return resize(size_ + source.size());
+}
+
+bool sfap::Buffer::push_back(std::byte byte) noexcept {
+    if (!data_)
+        return false;
+    if (size_ == capacity_)
+        return false;
+
+    data_[size_++] = byte;
+    return true;
+}
+
+std::optional<std::span<std::byte>> sfap::Buffer::subview(std::size_t from, std::size_t count) noexcept {
+    if (!data_)
+        return std::nullopt;
+    if (from + count > size_)
+        return std::nullopt;
+    return std::span<std::byte>{data_ + from, count};
+}
+
+std::optional<std::span<const std::byte>> sfap::Buffer::subview(std::size_t from, std::size_t count) const noexcept {
+    if (!data_)
+        return std::nullopt;
+    if (from + count > size_)
+        return std::nullopt;
+    return std::span<const std::byte>{data_ + from, count};
 }
