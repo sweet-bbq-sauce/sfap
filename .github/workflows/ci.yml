@@ -10,31 +10,40 @@ jobs:
   host-linux:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        cc: [gcc, clang]
+      matrix: { cc: [gcc, clang] }
     steps:
       - uses: actions/checkout@v4
 
-      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++-13 clang
+      - name: Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++-13 clang libc++-17-dev libc++abi-17-dev
 
       - name: Select compiler
         run: |
           if [ "${{ matrix.cc }}" = "gcc" ]; then
-            echo "CC=gcc-13" >> $GITHUB_ENV
+            echo "CC=gcc-13"  >> $GITHUB_ENV
             echo "CXX=g++-13" >> $GITHUB_ENV
           else
-            echo "CC=clang" >> $GITHUB_ENV
+            echo "CC=clang"    >> $GITHUB_ENV
             echo "CXX=clang++" >> $GITHUB_ENV
+            # wymuś libc++
+            echo "CMAKE_CXX_FLAGS=-stdlib=libc++"           >> $GITHUB_ENV
+            echo "CMAKE_EXE_LINKER_FLAGS=-stdlib=libc++"    >> $GITHUB_ENV
           fi
 
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            ${CMAKE_CXX_FLAGS:+-DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}"} \
+            ${CMAKE_EXE_LINKER_FLAGS:+-DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}"}
 
       - name: Build
-        run: cmake --build build --config Release -j
+        run: cmake --build build -j
 
       - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure
+        run: ctest --test-dir build --output-on-failure
 
   host-windows-msvc:
     runs-on: windows-latest
