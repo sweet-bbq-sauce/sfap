@@ -10,19 +10,31 @@ jobs:
   host-linux:
     runs-on: ubuntu-latest
     strategy:
-      matrix: { cc: [gcc, clang] }
+      matrix:
+        cc: [gcc, clang]
     steps:
       - uses: actions/checkout@v4
+
       - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++-13 clang
-      - name: Configure
+
+      - name: Select compiler
         run: |
-          if [[ "${{ matrix.cc }}" == "gcc" ]]; then
-            export CC=gcc CXX=g++;
+          if [ "${{ matrix.cc }}" = "gcc" ]; then
+            echo "CC=gcc-13" >> $GITHUB_ENV
+            echo "CXX=g++-13" >> $GITHUB_ENV
           else
-            export CC=clang CXX=clang++;
+            echo "CC=clang" >> $GITHUB_ENV
+            echo "CXX=clang++" >> $GITHUB_ENV
           fi
-      - name: Build & Test
-        run: cmake --build build && ctest --test-dir build --output-on-failure
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
 
   host-windows-msvc:
     runs-on: windows-latest
