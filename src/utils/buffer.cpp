@@ -197,14 +197,18 @@ bool sfap::Buffer::append(std::span<const std::byte> source) noexcept {
     if (size_ + source.size() > capacity_)
         return false;
 
-    std::memcpy(data_ + size_, source.data(), source.size());
-    return resize(size_ + source.size());
+    const std::size_t old_size = size_;
+    if (!resize(size_ + source.size()))
+        return false;
+
+    std::memcpy(data_ + old_size, source.data(), source.size());
+    return true;
 }
 
 bool sfap::Buffer::push_back(std::byte byte) noexcept {
     if (!data_)
         return false;
-    if (size_ == capacity_)
+    if (size_ >= capacity_)
         return false;
 
     data_[size_++] = byte;
@@ -214,15 +218,25 @@ bool sfap::Buffer::push_back(std::byte byte) noexcept {
 std::optional<std::span<std::byte>> sfap::Buffer::subview(std::size_t from, std::size_t count) noexcept {
     if (!data_)
         return std::nullopt;
-    if (from + count > size_)
+    if (from > size_)
         return std::nullopt;
+    if (count > size_ - from)
+        return std::nullopt;
+
     return std::span<std::byte>{data_ + from, count};
 }
 
 std::optional<std::span<const std::byte>> sfap::Buffer::subview(std::size_t from, std::size_t count) const noexcept {
     if (!data_)
         return std::nullopt;
-    if (from + count > size_)
+    if (from > size_)
         return std::nullopt;
+
+    if (count == 0) {
+        count = size_ - from;
+    } else if (from + count > size_) {
+        return std::nullopt;
+    }
+
     return std::span<const std::byte>{data_ + from, count};
 }

@@ -30,7 +30,7 @@ class Buffer {
   public:
     /*!
       \brief Construct owning buffer with given capacity.
-      \param capacity Number of bytes to allocate. 0 yields null buffer.
+      \param capacity Number of bytes to allocate. `0` yields null buffer.
       \note Allocation is nothrow. On failure capacity becomes 0.
     */
     explicit Buffer(std::size_t capacity) noexcept;
@@ -50,7 +50,7 @@ class Buffer {
 
     /*!
       \brief Move assign. Releases owned memory then takes ownership from source.
-      \return *this
+      \return `*this`
     */
     Buffer& operator=(Buffer&&) noexcept;
 
@@ -80,7 +80,7 @@ class Buffer {
     /*!
       \brief Content equality by size and byte-wise compare.
       \param other Buffer to compare.
-      \return true if sizes equal and bytes equal. Fast-path when pointers equal.
+      \return `true` if sizes equal and bytes equal. Fast-path when pointers equal.
     */
     bool operator==(const Buffer&) const noexcept;
 
@@ -93,7 +93,7 @@ class Buffer {
     /*!
       \brief Change logical size.
       \param n New size in bytes.
-      \return true on success. false if n > capacity().
+      \return `true` on success. `false` if `n > capacity()`.
       \note Does not initialize or erase bytes.
       \post `size() == n`
     */
@@ -103,21 +103,21 @@ class Buffer {
     std::byte* data() noexcept;
     const std::byte* data() const noexcept;
 
-    /// \return data() (may be nullptr).
+    /// \return `data()` (may be `nullptr`).
     std::byte* begin() noexcept;
     const std::byte* begin() const noexcept;
 
-    /// \return data() + size() (may be nullptr).
+    /// \return `data() + size()` (may be `nullptr`).
     std::byte* end() noexcept;
     const std::byte* end() const noexcept;
 
-    /// \return span [data(), data()+size()] or empty span for null buffer.
+    /// \return span `[data(), data()+size()]` or empty span for null buffer.
     std::span<std::byte> view() noexcept;
     std::span<const std::byte> view() const noexcept;
 
     /*!
       \brief Unchecked index access.
-      \param i Index in [0..size()).
+      \param i Index in `[0..size()]`.
       \return Reference to byte at i.
       \warning No bounds check. Undefined behavior on invalid i or null buffer.
     */
@@ -127,7 +127,7 @@ class Buffer {
     /*!
       \brief Checked access.
       \param i Index.
-      \return Byte at i if i < size() and buffer non-null, otherwise std::nullopt.
+      \return Byte at i if `i < size()` and buffer non-null, otherwise `std::nullopt`.
     */
     std::optional<std::byte> at(std::size_t i) const noexcept;
 
@@ -135,7 +135,7 @@ class Buffer {
       \brief Find first occurrence of a byte.
       \param c Byte to find.
       \param from Start index within used range.
-      \return Index on success, std::nullopt if not found or invalid input.
+      \return Index on success, `std::nullopt` if not found or invalid input.
     */
     std::optional<std::size_t> find(std::byte c, std::size_t from = 0) const noexcept;
 
@@ -143,17 +143,17 @@ class Buffer {
       \brief Find first occurrence of a pattern.
       \param pattern Non-empty pattern span.
       \param from Start index within used range.
-      \return Index of match start or std::nullopt if not found or invalid input.
+      \return Index of match start or `std::nullopt` if not found or invalid input.
     */
     std::optional<std::size_t> find(std::span<const std::byte> pattern, std::size_t from = 0) const noexcept;
 
     /*!
       \brief Replace buffer contents with \p source.
       \param source Bytes to copy into the buffer.
-      \return true on success, false if buffer is null or \p source.size() > capacity().
-      \post size() == source.size() on success; unchanged on failure.
+      \return `true` on success, `false` if buffer is null or \p source.size() > capacity().
+      \post `size() == source.size()` on success; unchanged on failure.
       \note Copies raw bytes; does not allocate.
-      \details If \p source is empty, the buffer is cleared (size() becomes 0).
+      \details If \p source is empty, the buffer is cleared (`size()` becomes `0`).
     */
     bool assign(std::span<const std::byte> source) noexcept;
 
@@ -169,27 +169,27 @@ class Buffer {
     /*!
       \brief Append a single byte.
       \param byte Value to push.
-      \return true on success, false if buffer is null or full().
-      \post size() increased by 1 on success; unchanged on failure.
+      \return `true` on success, `false` if buffer is null or `full()`.
+      \post `size()` increased by 1 on success; unchanged on failure.
     */
     bool push_back(std::byte byte) noexcept;
 
     /*!
       \brief Create a mutable subview of the stored bytes.
-      \param from Start index within [0, size()].
-      \param count Number of bytes in the view (default 0). May be 0 to create an empty view.
-      \return A span over [from, from + count) on success; std::nullopt if buffer is null or the range exceeds size().
+      \param from Start index within `[0, size()]`.
+      \param count Number of bytes in the view (default `0`). May be 0 to create an empty view.
+      \return A span over `[from, from + count]` on success; `std::nullopt` if buffer is null or the range exceeds
+      `size()`.
       \warning The returned span is invalidated by any operation that modifies the buffer’s storage or size.
     */
     std::optional<std::span<std::byte>> subview(std::size_t from, std::size_t count = 0) noexcept;
 
     /*!
       \brief Create a read-only subview of the stored bytes.
-      \param from Start index within [0, size()].
-      \param count Number of bytes in the view (default 0). May be 0 to create an empty view.
-      \return A const span over [from, from + count) on success; std::nullopt if buffer is null or the range exceeds
-              size().
-      \note The returned span aliases the underlying storage; no copy is made.
+      \param from Start index within `[0, size()]`.
+      \param count Number of bytes in the view (default `0`). May be 0 to create an empty view.
+      \return A const span over `[from, from + count]` on success; `std::nullopt` if buffer is null or the range exceeds
+              `size()`.
     */
     std::optional<std::span<const std::byte>> subview(std::size_t from, std::size_t count = 0) const noexcept;
 
