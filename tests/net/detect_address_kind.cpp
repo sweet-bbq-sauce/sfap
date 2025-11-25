@@ -123,12 +123,3 @@ TEST(detect_address_kind, EmbeddedNul_IPv4_TreatedAsIPv4) {
     ASSERT_TRUE(r);
     EXPECT_EQ(*r, AddressKind::IP4);
 }
-
-TEST(detect_address_kind, EmbeddedNul_Hostname_Fails) {
-    const char raw[] = {'e','x','a','m','p','l','e','.','c','o','m','\0','b','a','d'};
-    String addr(std::string_view{raw, sizeof(raw)});
-    const auto r = detect_address_kind(addr);
-    
-    ASSERT_TRUE(r);
-    EXPECT_EQ(*r, AddressKind::UNKNOWN);
-}

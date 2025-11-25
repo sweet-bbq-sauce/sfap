@@ -12,10 +12,9 @@
 
 #pragma once
 
-#include <system_error>
-
 #include <cstdint>
 
+#include <sfap/error.hpp>
 #include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
 
@@ -40,12 +39,11 @@ enum class AddressKind : std::uint8_t {
 
 /*!
   \brief Detects the type of a textual network address.
-
   \param address Input string to classify. May be empty.
-
+  
   \return
-    - On success: \c std::expected containing one of \c AddressType::{EMPTY, IP4, IP6, HOSTNAME, UNKNOWN}.
-    - On failure: \c std::unexpected with a \c std::error_code describing the OS error returned by the underlying parser
+    - On success: \c sfap::expected containing one of \c AddressType::{EMPTY, IP4, IP6, HOSTNAME, UNKNOWN}.
+    - On failure: \c sfap::unexpected with a \c sfap::error_code describing the OS error returned by the underlying parser
     (e.g., \c inet_pton).
 
   \remarks
@@ -53,13 +51,12 @@ enum class AddressKind : std::uint8_t {
     implementation.
     - Hostname validation follows DNS label rules (labels 1–63 chars, A–Z/a–z/0–9 and \c '-', no leading/trailing dash).
     FQDN length limits apply.
-    - Error category:
-      - POSIX: \c std::generic_category() with \c errno.
-      - Windows: \c std::system_category() with \c WSAGetLastError().
+    - Error category: \c sfap::network_category.
 
-    \note Function is \c noexcept; errors are reported via \c std::error_code.
+    \note Function is \c noexcept; errors are reported via \c sfap::error_code.
 */
-sfap::expected<AddressKind, std::error_code> detect_address_kind(const String& address) noexcept;
+sfap::expected<AddressKind, sfap::error_code> detect_address_kind(const String& address) noexcept;
+sfap::expected<AddressKind, sfap::error_code> detect_address_kind(const char* address) noexcept;
 
 } // namespace net
 } // namespace sfap

@@ -39,10 +39,10 @@ struct resolve_category final : public sfap::error_category {
     }
 };
 
-sfap::unexpected<sfap::error_code> resolve_error(int code) noexcept {
+const auto resolve_error = [](int code) noexcept -> sfap::unexpected<sfap::error_code> {
     static const resolve_category category;
     return sfap::unexpected<sfap::error_code>({code, category});
-}
+};
 
 sfap::expected<sfap::net::ipx_t, sfap::error_code> sfap::net::resolve(const String& address,
                                                                       ResolveMode mode) noexcept {

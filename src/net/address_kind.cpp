@@ -12,32 +12,25 @@
 
 #include <array>
 #include <string_view>
-#include <system_error>
 
 #include <cctype>
 #include <cstddef>
+#include <cstring>
 
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
-#include <cerrno>
-
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #endif
 
+#include <sfap/error.hpp>
 #include <sfap/net/address_kind.hpp>
 #include <sfap/net/types.hpp>
 #include <sfap/utils/string.hpp>
 
 namespace {
-
-#if defined(_WIN32)
-const auto last_net_error = []() noexcept { return std::error_code(::WSAGetLastError(), std::system_category()); };
-#else
-const auto last_net_error = []() noexcept { return std::error_code(errno, std::system_category()); };
-#endif
 
 const auto is_alpha = [](unsigned char c) noexcept -> bool { return std::isalpha(c); };
 const auto is_alnum_hyph = [](unsigned char c) noexcept -> bool { return std::isalnum(c) || c == '-'; };
@@ -108,28 +101,35 @@ const auto is_fqdn = [](std::string_view s) noexcept -> bool {
 
 } // namespace
 
-sfap::expected<sfap::net::AddressKind, std::error_code>
-sfap::net::detect_address_kind(const sfap::String& address) noexcept {
-    if (address.empty())
+sfap::expected<sfap::net::AddressKind, sfap::error_code>
+sfap::net::detect_address_kind(const String& address) noexcept {
+    return sfap::net::detect_address_kind(address.c_str());
+}
+
+sfap::expected<sfap::net::AddressKind, sfap::error_code> sfap::net::detect_address_kind(const char* address) noexcept {
+
+    const std::size_t address_size = std::strlen(address);
+
+    if (address_size == 0)
         return AddressKind::EMPTY;
-    if (address.size() > 254)
+    if (address_size > 254)
         return AddressKind::UNKNOWN;
 
     alignas(in6_addr) std::array<std::byte, sizeof(in6_addr)> sink;
 
-    const int ip4_test_result = ::inet_pton(AF_INET, address.c_str(), sink.data());
+    const int ip4_test_result = ::inet_pton(AF_INET, address, sink.data());
     if (ip4_test_result == 1)
         return AddressKind::IP4;
     else if (ip4_test_result == -1)
-        return std::unexpected(last_net_error());
+        return sfap::network_error();
 
-    const int ip6_test_result = ::inet_pton(AF_INET6, address.c_str(), sink.data());
+    const int ip6_test_result = ::inet_pton(AF_INET6, address, sink.data());
     if (ip6_test_result == 1)
         return AddressKind::IP6;
     else if (ip6_test_result == -1)
-        return std::unexpected(last_net_error());
+        return sfap::network_error();
 
-    if (is_fqdn(address.view()))
+    if (is_fqdn({address, address_size}))
         return AddressKind::HOSTNAME;
 
     return net::AddressKind::UNKNOWN;
