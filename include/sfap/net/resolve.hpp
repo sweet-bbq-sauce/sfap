@@ -12,6 +12,7 @@
 #include <sfap/net/types.hpp>
 #include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
+#include <sfap/error.hpp>
 
 namespace sfap {
 
@@ -62,8 +63,7 @@ enum class ResolveMode {
 
     This overload accepts an sfap::String and forwards to the `const char*`
     overload. The result type @c ipx_t represents either an IPv4 or IPv6
-    address (e.g. a variant-like type). On failure, the error contains an
-    integer code compatible with @c getaddrinfo (for example @c EAI_NONAME).
+    address (e.g. a variant-like type).
 
     The function never throws and uses the provided @ref ResolveMode
     to select the final address from the list returned by the system
@@ -73,13 +73,10 @@ enum class ResolveMode {
     \param mode Resolution policy controlling IPv4/IPv6 selection.
     \return An @c sfap::expected containing:
             - @c ipx_t on success,
-            - an @c int error code (e.g. from @c getaddrinfo) on failure.
-
-    \note This function is @c noexcept and is intended for low-level,
-          exception-free code paths.
+            - an @c error_code
 */
-sfap::expected<ipx_t, int> resolve(const String& address, ResolveMode mode) noexcept;
-sfap::expected<ipx_t, int> resolve(const char* address, ResolveMode mode) noexcept;
+sfap::expected<ipx_t, sfap::error_code> resolve(const String& address, ResolveMode mode) noexcept;
+sfap::expected<ipx_t, sfap::error_code> resolve(const char* address, ResolveMode mode) noexcept;
 
 } // namespace net
 

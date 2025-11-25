@@ -4,6 +4,11 @@ include( FetchContent )
 add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/net" )
 add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/utils" )
 
+set( SOURCES
+    ${SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/error.cpp"
+)
+
 add_library( sfap ${SOURCES} )
 
 check_cxx_source_compiles(

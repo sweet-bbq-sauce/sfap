@@ -14,6 +14,11 @@ set( INSTALL_GTEST OFF CACHE BOOL "" FORCE )
 add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/net" )
 add_subdirectory( "${CMAKE_CURRENT_SOURCE_DIR}/utils" )
 
+set( TESTS
+    ${TESTS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/error.cpp"
+)
+
 FetchContent_MakeAvailable( googletest )
 include( GoogleTest )
 

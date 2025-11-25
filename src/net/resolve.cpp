@@ -8,7 +8,6 @@
 */
 
 #include <optional>
-#include <utility>
 
 #include <cstring>
 
@@ -20,18 +19,39 @@
 #include <sys/socket.h>
 #endif
 
+#include <sfap/error.hpp>
 #include <sfap/net/resolve.hpp>
 #include <sfap/net/types.hpp>
 #include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
 
-sfap::expected<sfap::net::ipx_t, int> sfap::net::resolve(const String& address, ResolveMode mode) noexcept {
+struct resolve_category final : public sfap::error_category {
+    const char* name() const noexcept override {
+        return "resolve";
+    }
+
+    const char* message(int code) const noexcept override {
+#if defined(_WIN32)
+        return ::gai_strerrorA(code);
+#else
+        return ::gai_strerror(code);
+#endif
+    }
+};
+
+sfap::unexpected<sfap::error_code> resolve_error(int code) noexcept {
+    static const resolve_category category;
+    return sfap::unexpected<sfap::error_code>({code, category});
+}
+
+sfap::expected<sfap::net::ipx_t, sfap::error_code> sfap::net::resolve(const String& address,
+                                                                      ResolveMode mode) noexcept {
     return resolve(address.c_str(), mode);
 }
 
-sfap::expected<sfap::net::ipx_t, int> sfap::net::resolve(const char* address, ResolveMode mode) noexcept {
+sfap::expected<sfap::net::ipx_t, sfap::error_code> sfap::net::resolve(const char* address, ResolveMode mode) noexcept {
     if (!address)
-        return sfap::unexpected<int>(EAI_NONAME);
+        return resolve_error(EAI_NONAME);
 
     addrinfo hints{};
     hints.ai_socktype = SOCK_STREAM;
@@ -53,7 +73,7 @@ sfap::expected<sfap::net::ipx_t, int> sfap::net::resolve(const char* address, Re
     addrinfo* result = nullptr;
 
     if (const int result_code = ::getaddrinfo(address, nullptr, &hints, &result); result_code != 0)
-        return sfap::unexpected<int>(result_code);
+        return resolve_error(result_code);
 
     std::optional<ip4_t> found_ipv4{};
     std::optional<ip6_t> found_ipv6{};
@@ -63,10 +83,14 @@ sfap::expected<sfap::net::ipx_t, int> sfap::net::resolve(const char* address, Re
             found_ipv4.emplace();
             std::memcpy(found_ipv4->data(), &reinterpret_cast<const sockaddr_in*>(info->ai_addr)->sin_addr,
                         sizeof(ip4_t));
+            if (mode == ResolveMode::PREFER_IPV4 || mode == ResolveMode::REQUIRE_IPV4)
+                break;
         } else if (info->ai_family == AF_INET6 && !found_ipv6) {
             found_ipv6.emplace();
             std::memcpy(found_ipv6->data(), &reinterpret_cast<const sockaddr_in6*>(info->ai_addr)->sin6_addr,
                         sizeof(ip6_t));
+            if (mode == ResolveMode::PREFER_IPV6 || mode == ResolveMode::REQUIRE_IPV6)
+                break;
         }
 
         if (found_ipv4 && found_ipv6)
@@ -78,20 +102,28 @@ sfap::expected<sfap::net::ipx_t, int> sfap::net::resolve(const char* address, Re
     switch (mode) {
     case ResolveMode::REQUIRE_IPV4:
         if (!found_ipv4)
-            return sfap::unexpected<int>(EAI_NONAME);
+            return resolve_error(EAI_NONAME);
         return ipx_t(*found_ipv4);
 
     case ResolveMode::REQUIRE_IPV6:
         if (!found_ipv6)
-            return sfap::unexpected<int>(EAI_NONAME);
+            return resolve_error(EAI_NONAME);
         return ipx_t(*found_ipv6);
 
     case ResolveMode::PREFER_IPV4:
-        return found_ipv4 ? ipx_t(*found_ipv4) : ipx_t(*found_ipv6);
+        if (found_ipv4)
+            return ipx_t(*found_ipv4);
+        if (found_ipv6)
+            return ipx_t(*found_ipv6);
+        return resolve_error(EAI_NONAME);
 
     case ResolveMode::PREFER_IPV6:
-        return found_ipv6 ? ipx_t(*found_ipv6) : ipx_t(*found_ipv4);
+        if (found_ipv6)
+            return ipx_t(*found_ipv6);
+        if (found_ipv4)
+            return ipx_t(*found_ipv4);
+        return resolve_error(EAI_NONAME);
     }
 
-    std::unreachable();
+    return resolve_error(EAI_NONAME);
 }

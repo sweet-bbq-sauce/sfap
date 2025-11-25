@@ -17,7 +17,7 @@ using sfap::net::ResolveMode;
 TEST(ResolveIntegrationTest, NullptrAddressReturnsNoname) {
     auto res = resolve(static_cast<const char*>(nullptr), ResolveMode::PREFER_IPV4);
     ASSERT_FALSE(res.has_value());
-    EXPECT_EQ(res.error(), EAI_NONAME);
+    EXPECT_EQ(res.error().code(), EAI_NONAME);
 }
 
 TEST(ResolveIntegrationTest, LocalhostPreferIPv4ReturnsSomething) {
@@ -34,7 +34,7 @@ TEST(ResolveIntegrationTest, RequireIPv4OnLoopbackV4) {
 
 TEST(ResolveIntegrationTest, RequireIPv6OnLoopbackV6) {
     auto res = resolve("::1", ResolveMode::REQUIRE_IPV6);
-    if (!res.has_value() && res.error() == EAI_NONAME)
+    if (!res.has_value() && res.error().code() == EAI_NONAME)
         GTEST_SKIP() << "System has no IPv6 localhost (::1)";
     ASSERT_TRUE(res.has_value());
     EXPECT_TRUE(res->is_6());
