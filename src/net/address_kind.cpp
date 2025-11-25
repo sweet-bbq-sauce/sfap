@@ -36,7 +36,7 @@ namespace {
 #if defined(_WIN32)
 const auto last_net_error = []() noexcept { return std::error_code(::WSAGetLastError(), std::system_category()); };
 #else
-const auto last_net_error = []() noexcept { return std::error_code(errno, std::generic_category()); };
+const auto last_net_error = []() noexcept { return std::error_code(errno, std::system_category()); };
 #endif
 
 const auto is_alpha = [](unsigned char c) noexcept -> bool { return std::isalpha(c); };

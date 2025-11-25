@@ -23,7 +23,7 @@
 #include <sfap/utils/ringbuffer.hpp>
 
 sfap::RingBuffer::RingBuffer(std::size_t n) noexcept
-    : data_((n && std::has_single_bit(n)) ? new(std::nothrow) std::byte[n] : nullptr), capacity_(data_ ? n : 0),
+    : data_((n && std::has_single_bit(n)) ? new (std::nothrow) std::byte[n] : nullptr), capacity_(data_ ? n : 0),
       is_owner_(data_ != nullptr), mask_(capacity_ ? capacity_ - 1 : 0), head_(0), tail_(0), pending_w_(0),
       pending_r_(0) {}
 

@@ -1,0 +1,86 @@
+/*!
+  \file
+  \brief Hostname resolver interface.
+
+  \copyright Copyright (c) 2025 Wiktor Sołtys
+
+  \note License text intentionally omitted from docs. See repository LICENSE.
+*/
+
+#pragma once
+
+#include <sfap/net/types.hpp>
+#include <sfap/utils/expected.hpp>
+#include <sfap/utils/string.hpp>
+
+namespace sfap {
+
+namespace net {
+
+/*!
+    \brief Controls how hostname resolution should treat IPv4 and IPv6 addresses.
+
+    The resolver may receive both IPv4 and IPv6 results from the system
+    name service (getaddrinfo). This enum specifies which family is required
+    or only preferred when selecting the final address.
+*/
+enum class ResolveMode {
+    /*!
+        \brief Require an IPv4 address.
+
+        Resolution fails if no IPv4 address is available, even if IPv6
+        addresses exist.
+    */
+    REQUIRE_IPV4,
+    
+    /*!
+        \brief Prefer an IPv4 address.
+
+        If both IPv4 and IPv6 addresses are available, IPv4 is chosen.
+        If only IPv6 is available, IPv6 is returned.
+    */
+    PREFER_IPV4,
+    
+    /*!
+        \brief Require an IPv6 address.
+
+        Resolution fails if no IPv6 address is available, even if IPv4
+        addresses exist.
+    */
+    REQUIRE_IPV6,
+    
+    /*!
+        \brief Prefer an IPv6 address.
+
+        If both IPv4 and IPv6 addresses are available, IPv6 is chosen.
+        If only IPv4 is available, IPv4 is returned.
+    */
+    PREFER_IPV6 };
+
+/*!
+    \brief Resolves a hostname or textual IP address to an IPv4/IPv6 address.
+
+    This overload accepts an sfap::String and forwards to the `const char*`
+    overload. The result type @c ipx_t represents either an IPv4 or IPv6
+    address (e.g. a variant-like type). On failure, the error contains an
+    integer code compatible with @c getaddrinfo (for example @c EAI_NONAME).
+
+    The function never throws and uses the provided @ref ResolveMode
+    to select the final address from the list returned by the system
+    resolver.
+
+    \param address Hostname or textual IP address to resolve.
+    \param mode Resolution policy controlling IPv4/IPv6 selection.
+    \return An @c sfap::expected containing:
+            - @c ipx_t on success,
+            - an @c int error code (e.g. from @c getaddrinfo) on failure.
+
+    \note This function is @c noexcept and is intended for low-level,
+          exception-free code paths.
+*/
+sfap::expected<ipx_t, int> resolve(const String& address, ResolveMode mode) noexcept;
+sfap::expected<ipx_t, int> resolve(const char* address, ResolveMode mode) noexcept;
+
+} // namespace net
+
+} // namespace sfap
