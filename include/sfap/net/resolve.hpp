@@ -9,71 +9,72 @@
 
 #pragma once
 
+#include <sfap/error.hpp>
 #include <sfap/net/types.hpp>
 #include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
-#include <sfap/error.hpp>
 
 namespace sfap {
 
 namespace net {
 
 /*!
-    \brief Controls how hostname resolution should treat IPv4 and IPv6 addresses.
+  \brief Controls how hostname resolution should treat IPv4 and IPv6 addresses.
 
-    The resolver may receive both IPv4 and IPv6 results from the system
-    name service (getaddrinfo). This enum specifies which family is required
-    or only preferred when selecting the final address.
+  The resolver may receive both IPv4 and IPv6 results from the system
+  name service (getaddrinfo). This enum specifies which family is required
+  or only preferred when selecting the final address.
 */
 enum class ResolveMode {
     /*!
-        \brief Require an IPv4 address.
+      \brief Require an IPv4 address.
 
-        Resolution fails if no IPv4 address is available, even if IPv6
-        addresses exist.
+      Resolution fails if no IPv4 address is available, even if IPv6
+      addresses exist.
     */
     REQUIRE_IPV4,
-    
-    /*!
-        \brief Prefer an IPv4 address.
 
-        If both IPv4 and IPv6 addresses are available, IPv4 is chosen.
-        If only IPv6 is available, IPv6 is returned.
+    /*!
+      \brief Prefer an IPv4 address.
+
+      If both IPv4 and IPv6 addresses are available, IPv4 is chosen.
+      If only IPv6 is available, IPv6 is returned.
     */
     PREFER_IPV4,
-    
-    /*!
-        \brief Require an IPv6 address.
 
-        Resolution fails if no IPv6 address is available, even if IPv4
-        addresses exist.
+    /*!
+      \brief Require an IPv6 address.
+
+      Resolution fails if no IPv6 address is available, even if IPv4
+      addresses exist.
     */
     REQUIRE_IPV6,
-    
-    /*!
-        \brief Prefer an IPv6 address.
 
-        If both IPv4 and IPv6 addresses are available, IPv6 is chosen.
-        If only IPv4 is available, IPv4 is returned.
+    /*!
+      \brief Prefer an IPv6 address.
+
+      If both IPv4 and IPv6 addresses are available, IPv6 is chosen.
+      If only IPv4 is available, IPv4 is returned.
     */
-    PREFER_IPV6 };
+    PREFER_IPV6
+};
 
 /*!
-    \brief Resolves a hostname or textual IP address to an IPv4/IPv6 address.
+  \brief Resolves a hostname or textual IP address to an IPv4/IPv6 address.
 
-    This overload accepts an sfap::String and forwards to the `const char*`
-    overload. The result type @c ipx_t represents either an IPv4 or IPv6
-    address (e.g. a variant-like type).
+  This overload accepts an sfap::String and forwards to the `const char*`
+  overload. The result type @c ipx_t represents either an IPv4 or IPv6
+  address (e.g. a variant-like type).
 
-    The function never throws and uses the provided @ref ResolveMode
-    to select the final address from the list returned by the system
-    resolver.
+  The function never throws and uses the provided @ref ResolveMode
+  to select the final address from the list returned by the system
+  resolver.
 
-    \param address Hostname or textual IP address to resolve.
-    \param mode Resolution policy controlling IPv4/IPv6 selection.
-    \return An @c sfap::expected containing:
-            - @c ipx_t on success,
-            - an @c error_code
+  \param address Hostname or textual IP address to resolve.
+  \param mode Resolution policy controlling IPv4/IPv6 selection.
+  \return An @c sfap::expected containing:
+          - @c ipx_t on success,
+          - an @c error_code
 */
 sfap::expected<ipx_t, sfap::error_code> resolve(const String& address, ResolveMode mode) noexcept;
 sfap::expected<ipx_t, sfap::error_code> resolve(const char* address, ResolveMode mode) noexcept;

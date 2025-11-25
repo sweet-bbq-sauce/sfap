@@ -39,23 +39,23 @@ enum class AddressKind : std::uint8_t {
 };
 
 /*!
-    \brief Detects the type of a textual network address.
+  \brief Detects the type of a textual network address.
 
-    \param address Input string to classify. May be empty.
+  \param address Input string to classify. May be empty.
 
-    \return
+  \return
     - On success: \c std::expected containing one of \c AddressType::{EMPTY, IP4, IP6, HOSTNAME, UNKNOWN}.
     - On failure: \c std::unexpected with a \c std::error_code describing the OS error returned by the underlying parser
-   (e.g., \c inet_pton).
+    (e.g., \c inet_pton).
 
-    \remarks
+  \remarks
     - IPv4/IPv6 detection uses textual forms. For IPv6, zone IDs or bracketed forms may be rejected depending on
-   implementation.
+    implementation.
     - Hostname validation follows DNS label rules (labels 1–63 chars, A–Z/a–z/0–9 and \c '-', no leading/trailing dash).
-   FQDN length limits apply.
+    FQDN length limits apply.
     - Error category:
-        - POSIX: \c std::generic_category() with \c errno.
-        - Windows: \c std::system_category() with \c WSAGetLastError().
+      - POSIX: \c std::generic_category() with \c errno.
+      - Windows: \c std::system_category() with \c WSAGetLastError().
 
     \note Function is \c noexcept; errors are reported via \c std::error_code.
 */

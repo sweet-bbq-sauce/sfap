@@ -73,7 +73,7 @@ sfap::expected<sfap::net::ipx_t, sfap::error_code> sfap::net::resolve(const char
     addrinfo* result = nullptr;
 
     if (const int result_code = ::getaddrinfo(address, nullptr, &hints, &result); result_code != 0)
-        return resolve_error(result_code);
+        return sfap::generic_error(sfap::errc::INVALID_ARGUMENT);
 
     std::optional<ip4_t> found_ipv4{};
     std::optional<ip6_t> found_ipv6{};

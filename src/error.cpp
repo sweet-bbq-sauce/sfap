@@ -74,7 +74,6 @@ struct system_category final : public sfap::error_category {
         }
         return buffer;
 #else
-        // POSIX / inne: normalne strerror
         return std::strerror(code);
 #endif
     }
