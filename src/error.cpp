@@ -21,6 +21,10 @@
 sfap::error_code::error_code(int code, const sfap::error_category& category) noexcept
     : code_(code), category_(category) {}
 
+sfap::error_code::operator bool() const noexcept {
+    return code_ != 0;
+}
+
 const char* sfap::error_code::name() const noexcept {
     return category_.name();
 }
@@ -53,6 +57,8 @@ struct generic_category final : public sfap::error_category {
     const char* message(int code) const noexcept override {
         const sfap::errc err = static_cast<sfap::errc>(code);
         switch (err) {
+        case sfap::errc::OK:
+            return "ok";
         case sfap::errc::INVALID_ARGUMENT:
             return "invalid argument";
         }
@@ -101,6 +107,10 @@ struct network_category final : public sfap::error_category {
 #endif
     }
 };
+
+sfap::error_code sfap::no_error() noexcept {
+    return sfap::error_code{static_cast<int>(errc::OK), generic_category()};
+}
 
 sfap::unexpected<sfap::error_code> sfap::generic_error(errc code) noexcept {
     static const generic_category category;

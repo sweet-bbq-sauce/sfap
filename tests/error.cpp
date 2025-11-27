@@ -36,6 +36,23 @@ TEST(ErrorCode, StoresCodeAndCategory) {
     EXPECT_EQ(&cat, &ec.category());
 }
 
+TEST(ErrorCode, NoError) {
+    error_code ec1{generic_error(errc::OK).error()};
+    EXPECT_FALSE(ec1);
+
+    error_code ec2{generic_error(errc::INVALID_ARGUMENT).error()};
+    EXPECT_TRUE(ec2);
+
+    error_code ec3{network_error(0).error()};
+    EXPECT_FALSE(ec3);
+
+    error_code ec4{system_error(69).error()};
+    EXPECT_TRUE(ec4);
+
+    error_code ec5{sfap::no_error()};
+    EXPECT_FALSE(ec5);
+}
+
 TEST(ErrorCode, EqualitySameCodeAndCategory) {
     struct dummy_cat : sfap::error_category {
         const char* name() const noexcept override {

@@ -23,6 +23,8 @@ class error_code {
   public:
     error_code(int code, const error_category& category) noexcept;
 
+    explicit operator bool() const noexcept;
+
     /// \brief Get error category name.
     const char* name() const noexcept;
 
@@ -43,7 +45,10 @@ class error_code {
 bool operator==(const error_category&, const error_category&) noexcept;
 bool operator==(const error_code&, const error_code&) noexcept;
 
-enum class errc : int { INVALID_ARGUMENT };
+enum class errc : int { OK, INVALID_ARGUMENT };
+
+/// \brief Return no error (`OK` from \c generic_category).
+error_code no_error() noexcept;
 
 /// \brief Return generic error.
 unexpected<error_code> generic_error(errc code) noexcept;
@@ -59,5 +64,7 @@ unexpected<error_code> network_error() noexcept;
 
 /// \brief Return network error.
 unexpected<error_code> network_error(int code) noexcept;
+
+template<typename T> using result = sfap::expected<T, error_code>;
 
 } // namespace sfap

@@ -22,8 +22,11 @@
 #include <sfap/error.hpp>
 #include <sfap/net/resolve.hpp>
 #include <sfap/net/types.hpp>
-#include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
+
+namespace sfap::net::config {
+sfap::net::ResolveMode default_resolve_mode = sfap::net::ResolveMode::PREFER_IPV4;
+}
 
 struct resolve_category final : public sfap::error_category {
     const char* name() const noexcept override {
@@ -44,12 +47,11 @@ const auto resolve_error = [](int code) noexcept -> sfap::unexpected<sfap::error
     return sfap::unexpected<sfap::error_code>({code, category});
 };
 
-sfap::expected<sfap::net::ipx_t, sfap::error_code> sfap::net::resolve(const String& address,
-                                                                      ResolveMode mode) noexcept {
+sfap::result<sfap::net::ipx_t> sfap::net::resolve(const String& address, ResolveMode mode) noexcept {
     return resolve(address.c_str(), mode);
 }
 
-sfap::expected<sfap::net::ipx_t, sfap::error_code> sfap::net::resolve(const char* address, ResolveMode mode) noexcept {
+sfap::result<sfap::net::ipx_t> sfap::net::resolve(const char* address, ResolveMode mode) noexcept {
     if (!address)
         return resolve_error(EAI_NONAME);
 

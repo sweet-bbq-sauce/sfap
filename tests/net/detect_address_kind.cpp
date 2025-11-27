@@ -19,6 +19,13 @@ TEST(detect_address_kind, Empty) {
     EXPECT_EQ(*r, AddressKind::EMPTY);
 }
 
+TEST(detect_address_kind, NullString) {
+    const auto r = detect_address_kind(nullptr);
+
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(*r, AddressKind::EMPTY);
+}
+
 TEST(detect_address_kind, IPv4_Valid) {
     String addr("203.0.113.5");
     const auto r = detect_address_kind(addr);

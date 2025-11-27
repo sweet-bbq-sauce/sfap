@@ -11,7 +11,6 @@
 
 #include <sfap/error.hpp>
 #include <sfap/net/types.hpp>
-#include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
 
 namespace sfap {
@@ -59,6 +58,10 @@ enum class ResolveMode {
     PREFER_IPV6
 };
 
+namespace config {
+extern ResolveMode default_resolve_mode;
+}
+
 /*!
   \brief Resolves a hostname or textual IP address to an IPv4/IPv6 address.
 
@@ -76,8 +79,8 @@ enum class ResolveMode {
           - @c ipx_t on success,
           - an @c error_code
 */
-sfap::expected<ipx_t, sfap::error_code> resolve(const String& address, ResolveMode mode) noexcept;
-sfap::expected<ipx_t, sfap::error_code> resolve(const char* address, ResolveMode mode) noexcept;
+sfap::result<ipx_t> resolve(const String& address, ResolveMode mode = config::default_resolve_mode) noexcept;
+sfap::result<ipx_t> resolve(const char* address, ResolveMode mode = config::default_resolve_mode) noexcept;
 
 } // namespace net
 

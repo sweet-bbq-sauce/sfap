@@ -10,6 +10,7 @@
   \note License text intentionally omitted from docs. See repository LICENSE.
 */
 
+#include <cstring>
 #include <variant>
 
 #include <sfap/net/types.hpp>
@@ -46,4 +47,9 @@ const std::uint8_t* sfap::net::ipx_t::data() const noexcept {
 
 std::size_t sfap::net::ipx_t::size() const noexcept {
     return std::visit([](auto const& a) -> std::size_t { return a.size(); }, address_);
+}
+
+bool sfap::net::ipx_t::is_any(const ipx_t& ip) noexcept {
+    static const ip6_t zeros{};
+    return std::memcmp(ip.data(), zeros.data(), ip.size()) == 0;
 }

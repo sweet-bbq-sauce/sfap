@@ -77,7 +77,7 @@ const auto is_fqdn = [](std::string_view s) noexcept -> bool {
         return false;
     ++labels;
 
-    if (labels < 2)
+    if (labels < 1)
         return false;
 
     std::string_view tld = s.substr(label_start, label_len);
@@ -101,12 +101,13 @@ const auto is_fqdn = [](std::string_view s) noexcept -> bool {
 
 } // namespace
 
-sfap::expected<sfap::net::AddressKind, sfap::error_code>
-sfap::net::detect_address_kind(const String& address) noexcept {
+sfap::result<sfap::net::AddressKind> sfap::net::detect_address_kind(const String& address) noexcept {
     return sfap::net::detect_address_kind(address.c_str());
 }
 
-sfap::expected<sfap::net::AddressKind, sfap::error_code> sfap::net::detect_address_kind(const char* address) noexcept {
+sfap::result<sfap::net::AddressKind> sfap::net::detect_address_kind(const char* address) noexcept {
+
+    if (!address) return AddressKind::EMPTY;
 
     const std::size_t address_size = std::strlen(address);
 

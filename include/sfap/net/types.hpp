@@ -80,6 +80,8 @@ class ipx_t {
     /// \return 4 for IPv4, 16 for IPv6.
     std::size_t size() const noexcept;
 
+    static bool is_any(const ipx_t& ip) noexcept;
+
   private:
     std::variant<ip4_t, ip6_t> address_; ///< Address storage.
 };

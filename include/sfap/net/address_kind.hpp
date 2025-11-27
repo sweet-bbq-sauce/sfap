@@ -15,7 +15,6 @@
 #include <cstdint>
 
 #include <sfap/error.hpp>
-#include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
 
 namespace sfap {
@@ -55,8 +54,8 @@ enum class AddressKind : std::uint8_t {
 
     \note Function is \c noexcept; errors are reported via \c sfap::error_code.
 */
-sfap::expected<AddressKind, sfap::error_code> detect_address_kind(const String& address) noexcept;
-sfap::expected<AddressKind, sfap::error_code> detect_address_kind(const char* address) noexcept;
+sfap::result<AddressKind> detect_address_kind(const String& address) noexcept;
+sfap::result<AddressKind> detect_address_kind(const char* address) noexcept;
 
 } // namespace net
 } // namespace sfap
