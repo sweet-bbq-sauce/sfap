@@ -13,9 +13,7 @@
 #include <sfap/net/types.hpp>
 #include <sfap/utils/string.hpp>
 
-namespace sfap {
-
-namespace net {
+namespace sfap::net {
 
 /*!
   \brief Controls how hostname resolution should treat IPv4 and IPv6 addresses.
@@ -82,6 +80,4 @@ extern ResolveMode default_resolve_mode;
 sfap::result<ipx_t> resolve(const String& address, ResolveMode mode = config::default_resolve_mode) noexcept;
 sfap::result<ipx_t> resolve(const char* address, ResolveMode mode = config::default_resolve_mode) noexcept;
 
-} // namespace net
-
-} // namespace sfap
+} // namespace sfap::net

@@ -19,9 +19,7 @@
 #include <sfap/net/types.hpp>
 #include <sfap/utils/string.hpp>
 
-namespace sfap {
-
-namespace net {
+namespace sfap::net {
 
 /*!
   \brief Address object holding an IP address and port.
@@ -37,7 +35,6 @@ namespace net {
 */
 class Address {
   public:
-
     /*!
       \brief Constructs an empty address.
 
@@ -162,6 +159,4 @@ class Address {
     std::optional<String> origin_;
 };
 
-} // namespace net
-
-} // namespace sfap
+} // namespace sfap::net

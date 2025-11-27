@@ -20,8 +20,10 @@
 #include <sfap/utils/expected.hpp>
 #include <sfap/utils/string.hpp>
 
-namespace sfap {
-namespace net {
+namespace sfap::net {
+
+/// \brief Network socket handle.
+using socket_t = std::uint32_t;
 
 /// \brief Network port type in host byte order.
 using port_t = std::uint16_t;
@@ -86,5 +88,4 @@ class ipx_t {
     std::variant<ip4_t, ip6_t> address_; ///< Address storage.
 };
 
-} // namespace net
-} // namespace sfap
+} // namespace sfap::net
