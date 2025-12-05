@@ -18,8 +18,8 @@ class Socket {
 
     explicit Socket(Proactor* owner, socket_t handle) noexcept;
 
-    Socket(const Socket&) = delete;
-    Socket& operator=(const Socket&) = delete;
+    Socket(const Socket&) = default;
+    Socket& operator=(const Socket&) = default;
 
     explicit Socket(Socket&& other) noexcept;
     Socket& operator=(Socket&& other) noexcept;

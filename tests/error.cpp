@@ -33,7 +33,12 @@ TEST(ErrorCode, StoresCodeAndCategory) {
     EXPECT_EQ(123, ec.code());
     EXPECT_STREQ("dummy", ec.name());
     EXPECT_STREQ("msg", ec.message());
-    EXPECT_EQ(&cat, &ec.category());
+    EXPECT_EQ(&cat, ec.category());
+}
+
+TEST(ErrorCode, DefaultValue) {
+    error_code ec;
+    EXPECT_FALSE(ec);
 }
 
 TEST(ErrorCode, NoError) {

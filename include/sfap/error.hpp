@@ -21,6 +21,7 @@ struct error_category {
 
 class error_code {
   public:
+    error_code() = default;
     error_code(int code, const error_category& category) noexcept;
 
     explicit operator bool() const noexcept;
@@ -35,17 +36,17 @@ class error_code {
     int code() const noexcept;
 
     /// \brief Get error category.
-    const error_category& category() const noexcept;
+    const error_category* category() const noexcept;
 
   private:
-    int code_;
-    const error_category& category_;
+    int code_{};
+    const error_category* category_{};
 };
 
 bool operator==(const error_category&, const error_category&) noexcept;
 bool operator==(const error_code&, const error_code&) noexcept;
 
-enum class errc : int { OK, INVALID_ARGUMENT };
+enum class errc : int { OK, INVALID_ARGUMENT, NOT_ENOUGH_MEMORY };
 
 /// \brief Return no error (`OK` from \c generic_category).
 error_code no_error() noexcept;

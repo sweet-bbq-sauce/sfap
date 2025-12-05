@@ -49,10 +49,10 @@ sfap::task<void> sfap::net::Socket::send_bytes(std::span<const std::byte> data) 
     std::size_t offset = 0;
     while (offset < data.size()) {
         std::span<const std::byte> chunk = data.subspan(offset);
-        const std::size_t sent = co_await owner_->socket_send(handle_, chunk);
-        if (sent == 0)
+        const auto sent = co_await owner_->socket_send(handle_, chunk);
+        if (!sent && *sent == 0)
             break;
-        offset += sent;
+        offset += *sent;
     }
 
     co_return;
@@ -65,10 +65,10 @@ sfap::task<void> sfap::net::Socket::recv_bytes(std::span<std::byte> data, bool e
     std::size_t offset = 0;
     while (offset < data.size()) {
         std::span<std::byte> chunk = data.subspan(offset);
-        const std::size_t received = co_await owner_->socket_recv(handle_, chunk);
-        if (received == 0)
+        const auto received = co_await owner_->socket_recv(handle_, chunk);
+        if (!received && *received == 0)
             break;
-        offset += received;
+        offset += *received;
         if (!exact)
             break;
     }

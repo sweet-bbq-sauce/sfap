@@ -19,25 +19,25 @@
 #include <sfap/utils/expected.hpp>
 
 sfap::error_code::error_code(int code, const sfap::error_category& category) noexcept
-    : code_(code), category_(category) {}
+    : code_(code), category_(&category) {}
 
 sfap::error_code::operator bool() const noexcept {
     return code_ != 0;
 }
 
 const char* sfap::error_code::name() const noexcept {
-    return category_.name();
+    return category_ ? category_->name() : "unspecifed";
 }
 
 const char* sfap::error_code::message() const noexcept {
-    return category_.message(code_);
+    return category_ ? category_->message(code_) : "";
 }
 
 int sfap::error_code::code() const noexcept {
     return code_;
 }
 
-const sfap::error_category& sfap::error_code::category() const noexcept {
+const sfap::error_category* sfap::error_code::category() const noexcept {
     return category_;
 }
 
@@ -61,6 +61,10 @@ struct generic_category final : public sfap::error_category {
             return "ok";
         case sfap::errc::INVALID_ARGUMENT:
             return "invalid argument";
+
+	case sfap::errc::NOT_ENOUGH_MEMORY:
+	    return "not enough memory";
+	    break;
         }
 
         return "unknown error";
