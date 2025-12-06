@@ -177,7 +177,7 @@ sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(
 
         result<Socket> await_resume() noexcept {
             if (error_)
-                return sfap::unexpected(error_);
+                return sfap::unexpected<error_code>(error_);
             return Socket{&self_, socket_};
         }
 
@@ -206,7 +206,7 @@ sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(
 
     if (!result) {
         cleanup();
-        co_return sfap::unexpected(result.error());
+        co_return sfap::unexpected<error_code>(result.error());
     }
 
     if (!result->is_valid())
@@ -342,7 +342,7 @@ sfap::net::IOUringProactor::socket_send(socket_t sid, std::span<const std::byte>
 
         result<std::size_t> await_resume() noexcept {
             if (error_)
-                return sfap::unexpected(error_);
+                return sfap::unexpected<error_code>(error_);
             return bytes_;
         }
 
@@ -418,7 +418,7 @@ sfap::task<sfap::result<std::size_t>> sfap::net::IOUringProactor::socket_recv(so
 
         result<std::size_t> await_resume() noexcept {
             if (error_)
-                return sfap::unexpected(error_);
+                return sfap::unexpected<error_code>(error_);
             return bytes_;
         }
 
