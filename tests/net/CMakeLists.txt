@@ -1,3 +1,5 @@
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/platform")
+
 set( TESTS
     ${TESTS}
     "${CMAKE_CURRENT_SOURCE_DIR}/address.cpp"

@@ -1,8 +1,12 @@
 #pragma once
 
-#include "sfap/error.hpp"
+#include <sfap/config.hpp>
+
+#if defined(SUPPORTED_IOURING)
+
 #include <atomic>
 #include <coroutine>
+#include <span>
 #include <unordered_map>
 
 #include <cstddef>
@@ -10,6 +14,7 @@
 
 #include <liburing.h>
 
+#include <sfap/error.hpp>
 #include <sfap/net/address.hpp>
 #include <sfap/net/proactor.hpp>
 #include <sfap/net/socket.hpp>
@@ -51,21 +56,29 @@ class IOUringProactor final : public Proactor {
 
     enum class OperationType : std::uint8_t { CONNECT, SEND, RECV, TIMEOUT };
 
+    class Awaiter;
+
     struct OperationData {
         OperationType type;
         socket_t handle;
         std::coroutine_handle<> coro;
-        std::size_t result{0};
+        Awaiter* awaiter{};
     };
 
-    struct Awaiter {
+    class Awaiter {
+      public:
+        Awaiter(IOUringProactor& self, socket_t socket) noexcept;
+        virtual ~Awaiter() = default;
+
+        virtual void on_complete(int result) noexcept = 0;
+
+        error_code get_error() const noexcept;
+
+      protected:
         IOUringProactor& self_;
         socket_t socket_;
         error_code error_{};
         OperationData* operation_{};
-
-        Awaiter(IOUringProactor& self, socket_t socket) noexcept;
-        virtual ~Awaiter() = default;
     };
 
     io_uring ring_{};
@@ -81,3 +94,5 @@ class IOUringProactor final : public Proactor {
 };
 
 } // namespace sfap::net
+
+#endif

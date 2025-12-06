@@ -1,3 +1,7 @@
+#include <sfap/config.hpp>
+
+#if defined(SUPPORTED_IOURING)
+
 #include <atomic>
 #include <chrono>
 #include <coroutine>
@@ -26,6 +30,10 @@
 sfap::net::IOUringProactor::Awaiter::Awaiter(sfap::net::IOUringProactor& self, socket_t socket) noexcept
     : self_(self), socket_(socket) {}
 
+sfap::error_code sfap::net::IOUringProactor::Awaiter::get_error() const noexcept {
+    return error_;
+}
+
 sfap::net::IOUringProactor::IOUringProactor(std::size_t entries) noexcept {
     if (const int result = io_uring_queue_init(entries, &ring_, 0); result < 0)
         last_error_ = network_error(-result).error();
@@ -43,6 +51,14 @@ sfap::net::IOUringProactor::~IOUringProactor() noexcept {
     sockets_.clear();
 
     io_uring_queue_exit(&ring_);
+}
+
+sfap::net::IOUringProactor::operator bool() const noexcept {
+    return !last_error_;
+}
+
+sfap::error_code sfap::net::IOUringProactor::get_error() const noexcept {
+    return last_error_;
 }
 
 sfap::result<sfap::net::IOUringProactor::OperationData*> sfap::net::IOUringProactor::alloc_opdata() noexcept {
@@ -71,6 +87,13 @@ void sfap::net::IOUringProactor::run() noexcept {
 
 void sfap::net::IOUringProactor::stop() noexcept {
     running_.store(false, std::memory_order_release);
+
+    io_uring_sqe* sqe = io_uring_get_sqe(&ring_);
+    if (sqe) {
+        io_uring_prep_nop(sqe);
+        io_uring_sqe_set_data(sqe, nullptr);
+        io_uring_submit(&ring_);
+    }
 }
 
 sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(const sfap::net::Address& address,
@@ -90,11 +113,11 @@ sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(
         if (family == AF_INET) {
             auto* ipv4 = reinterpret_cast<sockaddr_in*>(&ss);
             destination = &ipv4->sin_addr;
-            ipv4->sin_port = htons(addr->port_);
+            ipv4->sin_port = ::htons(addr->port_);
         } else {
             auto* ipv6 = reinterpret_cast<sockaddr_in6*>(&ss);
             destination = &ipv6->sin6_addr;
-            ipv6->sin6_port = htons(addr->port_);
+            ipv6->sin6_port = ::htons(addr->port_);
         }
 
         std::memcpy(destination, addr->ip_.data(), addr->ip_.size());
@@ -102,12 +125,11 @@ sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(
 
     sockets_.emplace(sid, SocketState{fd, false});
 
-    struct ConnectAwaiter final : public Awaiter {
+    class ConnectAwaiter final : public Awaiter {
 
+      public:
         explicit ConnectAwaiter(IOUringProactor& self_, socket_t socket_, sockaddr_storage* ss)
             : Awaiter(self_, socket_), address(ss) {}
-
-        sockaddr_storage* address;
 
         bool await_ready() const noexcept {
             return false;
@@ -137,6 +159,7 @@ sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(
             }
 
             operation_ = *alloc_result;
+            operation_->awaiter = this;
             operation_->type = OperationType::CONNECT;
             operation_->handle = socket_;
             operation_->coro = h;
@@ -157,21 +180,37 @@ sfap::task<sfap::result<sfap::net::Socket>> sfap::net::IOUringProactor::connect(
                 return sfap::unexpected(error_);
             return Socket{&self_, socket_};
         }
+
+        void on_complete(int result) noexcept override {
+            if (result < 0)
+                error_ = network_error(-result).error();
+            else
+                error_ = no_error();
+        }
+
+      private:
+        sockaddr_storage* address;
     };
 
     ConnectAwaiter aw(*this, sid, &ss);
     auto result = co_await aw;
-    if (!result)
-        co_return sfap::unexpected(result.error());
 
-    if (!result->is_valid()) {
-        auto it = sockets_.find(sid);
+    const auto cleanup = [this, sid]() {
+        const auto it = sockets_.find(sid);
         if (it != sockets_.end()) {
             if (it->second.handle >= 0)
                 ::close(it->second.handle);
             sockets_.erase(it);
         }
+    };
+
+    if (!result) {
+        cleanup();
+        co_return sfap::unexpected(result.error());
     }
+
+    if (!result->is_valid())
+        cleanup();
 
     co_return result;
 }
@@ -196,10 +235,8 @@ sfap::task<sfap::error_code> sfap::net::IOUringProactor::sleep_for(sfap::net::Pr
 
     struct SleepAwaiter final : public Awaiter {
 
+      public:
         explicit SleepAwaiter(IOUringProactor& self_, std::chrono::nanoseconds ns_) : Awaiter(self_, 0), ns(ns_) {}
-
-        std::chrono::nanoseconds ns;
-        bool done{false};
 
         bool await_ready() const noexcept {
             return false;
@@ -208,20 +245,20 @@ sfap::task<sfap::error_code> sfap::net::IOUringProactor::sleep_for(sfap::net::Pr
         void await_suspend(std::coroutine_handle<> h) noexcept {
             io_uring_sqe* sqe = io_uring_get_sqe(&self_.ring_);
             if (!sqe) {
-                done = true;
+                error_ = network_error().error();
                 h.resume();
                 return;
             }
 
             const auto alloc_result{self_.alloc_opdata()};
             if (!alloc_result) {
-                done = true;
                 error_ = alloc_result.error();
                 h.resume();
                 return;
             }
 
             operation_ = *alloc_result;
+            operation_->awaiter = this;
             operation_->type = OperationType::TIMEOUT;
             operation_->handle = 0;
             operation_->coro = h;
@@ -233,30 +270,34 @@ sfap::task<sfap::error_code> sfap::net::IOUringProactor::sleep_for(sfap::net::Pr
             io_uring_prep_timeout(sqe, &ts, 0, 0);
             io_uring_sqe_set_data(sqe, operation_);
 
-            if (io_uring_submit(&self_.ring_) < 0) {
+            if (const int result = io_uring_submit(&self_.ring_); result < 0) {
                 self_.free_opdata(operation_);
-                done = true;
+                error_ = network_error(-result).error();
                 h.resume();
             }
         }
 
+        void on_complete(int) noexcept override {
+            error_ = no_error();
+        }
+
         void await_resume() noexcept {}
+
+      private:
+        std::chrono::nanoseconds ns;
     };
 
     SleepAwaiter aw{*this, std::chrono::duration_cast<std::chrono::nanoseconds>(d)};
     co_await aw;
-    co_return no_error();
+    co_return aw.get_error();
 }
 
 sfap::task<sfap::result<std::size_t>>
 sfap::net::IOUringProactor::socket_send(socket_t sid, std::span<const std::byte> data) noexcept {
     struct SendAwaiter final : public Awaiter {
-
+      public:
         explicit SendAwaiter(IOUringProactor& self, socket_t socket, std::span<const std::byte> data) noexcept
             : Awaiter(self, socket), data_(data) {}
-
-        std::span<const std::byte> data_;
-        std::size_t bytes_{};
 
         bool await_ready() const noexcept {
             return data_.empty();
@@ -277,43 +318,57 @@ sfap::net::IOUringProactor::socket_send(socket_t sid, std::span<const std::byte>
             }
 
             const auto alloc_result{self_.alloc_opdata()};
-            if (alloc_result.error()) {
+            if (!alloc_result) {
                 error_ = alloc_result.error();
                 h.resume();
                 return;
             }
 
-            auto* operation{*alloc_result};
-            operation->type = OperationType::SEND;
-            operation->handle = socket_;
-            operation->coro = h;
+            operation_ = *alloc_result;
+            operation_->awaiter = this;
+            operation_->type = OperationType::SEND;
+            operation_->handle = socket_;
+            operation_->coro = h;
 
             io_uring_prep_send(sqe, handle, data_.data(), static_cast<size_t>(data_.size()), 0);
-            io_uring_sqe_set_data(sqe, operation);
+            io_uring_sqe_set_data(sqe, operation_);
 
             if (const int result = io_uring_submit(&self_.ring_); result < 0) {
-                self_.free_opdata(operation);
+                self_.free_opdata(operation_);
                 error_ = network_error(-result).error();
                 h.resume();
             }
         }
 
         result<std::size_t> await_resume() noexcept {
+            if (error_)
+                return sfap::unexpected(error_);
             return bytes_;
         }
+
+        void on_complete(int result) noexcept override {
+            if (result < 0) {
+                error_ = network_error(-result).error();
+                bytes_ = 0;
+            } else {
+                error_ = no_error();
+                bytes_ = static_cast<std::size_t>(result);
+            }
+        }
+
+      private:
+        std::span<const std::byte> data_;
+        std::size_t bytes_{};
     };
 
     SendAwaiter aw{*this, sid, data};
-    if (const auto result = co_await aw; !result)
-        co_return sfap::unexpected(result.error());
-    else
-        co_return *result;
+    co_return co_await aw;
 }
 
 sfap::task<sfap::result<std::size_t>> sfap::net::IOUringProactor::socket_recv(socket_t sid,
                                                                               std::span<std::byte> data) noexcept {
     struct RecvAwaiter final : public Awaiter {
-
+      public:
         explicit RecvAwaiter(IOUringProactor& self, socket_t socket, std::span<std::byte> data) noexcept
             : Awaiter(self, socket), data_(data) {}
 
@@ -339,36 +394,47 @@ sfap::task<sfap::result<std::size_t>> sfap::net::IOUringProactor::socket_recv(so
             }
 
             const auto alloc_result{self_.alloc_opdata()};
-            if (alloc_result.error()) {
+            if (!alloc_result) {
                 error_ = alloc_result.error();
                 h.resume();
                 return;
             }
 
-            auto* operation{*alloc_result};
-            operation->type = OperationType::RECV;
-            operation->handle = socket_;
-            operation->coro = h;
+            operation_ = *alloc_result;
+            operation_->awaiter = this;
+            operation_->type = OperationType::RECV;
+            operation_->handle = socket_;
+            operation_->coro = h;
 
             io_uring_prep_recv(sqe, handle, data_.data(), static_cast<size_t>(data_.size()), 0);
-            io_uring_sqe_set_data(sqe, operation);
+            io_uring_sqe_set_data(sqe, operation_);
 
-            if (io_uring_submit(&self_.ring_) < 0) {
-                self_.free_opdata(operation);
+            if (const int result = io_uring_submit(&self_.ring_); result < 0) {
+                self_.free_opdata(operation_);
+                error_ = network_error(-result).error();
                 h.resume();
             }
         }
 
         result<std::size_t> await_resume() noexcept {
+            if (error_)
+                return sfap::unexpected(error_);
             return bytes_;
+        }
+
+        void on_complete(int result) noexcept override {
+            if (result < 0) {
+                error_ = network_error(-result).error();
+                bytes_ = 0;
+            } else {
+                error_ = no_error();
+                bytes_ = static_cast<std::size_t>(result);
+            }
         }
     };
 
     RecvAwaiter aw{*this, sid, data};
-    if (const auto result = co_await aw; !result)
-        co_return sfap::unexpected(result.error());
-    else
-        co_return *result;
+    co_return co_await aw;
 }
 
 void sfap::net::IOUringProactor::handle_cqe(io_uring_cqe* cqe) noexcept {
@@ -376,32 +442,15 @@ void sfap::net::IOUringProactor::handle_cqe(io_uring_cqe* cqe) noexcept {
     if (!operation)
         return;
 
-    const int result = cqe->res;
+    const int result{cqe->res};
+    Awaiter* aw{operation->awaiter};
 
-    switch (operation->type) {
-    case OperationType::CONNECT: {
-        if (result < 0)
-            operation->result = static_cast<std::size_t>(-1);
-        else
-            operation->result = 0;
-    } break;
-
-    case OperationType::SEND:
-    case OperationType::RECV: {
-        if (result < 0)
-            operation->result = 0;
-        else
-            operation->result = static_cast<std::size_t>(result);
-    } break;
-
-    case OperationType::TIMEOUT:
-        operation->result = 0;
-        break;
-    }
-
+    if (aw)
+        aw->on_complete(result);
     auto h = operation->coro;
-
     free_opdata(operation);
     if (h)
         h.resume();
 }
+
+#endif

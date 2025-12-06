@@ -6,6 +6,11 @@ set( CMAKE_CXX_STANDARD 23 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
+find_package( PkgConfig )
+if ( NOT PkgConfig_FOUND )
+    message( ERROR "pkg-config not found" )
+endif ()
+
 include( "${CMAKE_SOURCE_DIR}/cmake/doxygen.cmake" )
 include( "${CMAKE_SOURCE_DIR}/cmake/sanitizers.cmake" )
 
@@ -18,6 +23,16 @@ if ( MSVC )
 endif ()
 
 include_directories( "${CMAKE_SOURCE_DIR}/include" )
+include_directories( "${CMAKE_BINARY_DIR}/include" )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    pkg_check_modules( LIBURING liburing )
+    if ( LIBURING_FOUND )
+        set( SUPPORTED_IOURING TRUE )
+    else ()
+        set( SUPPORTED_IOURING FALSE )
+    endif ()
+endif ()
 
 add_subdirectory( "${CMAKE_SOURCE_DIR}/src" )
 
@@ -27,3 +42,9 @@ if ( BUILD_TESTS )
     enable_testing()
     add_subdirectory( "${CMAKE_SOURCE_DIR}/tests" )
 endif ()
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/sfap/config.hpp"
+    @ONLY
+)

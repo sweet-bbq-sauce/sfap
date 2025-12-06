@@ -41,3 +41,8 @@ endif()
 if ( WIN32 )
     target_link_libraries( sfap PRIVATE ws2_32 )
 endif ()
+
+if ( LIBURING_FOUND )
+    target_include_directories( sfap INTERFACE ${LIBURING_INCLUDE_DIRS} )
+    target_link_libraries( sfap INTERFACE ${LIBURING_LIBRARIES} )
+endif ()
