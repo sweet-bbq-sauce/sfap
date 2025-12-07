@@ -16,7 +16,7 @@ sfap::net::Socket::~Socket() noexcept {
     if (owner_ && handle_ != 0) {
         owner_->close(handle_);
         owner_ = nullptr;
-        owner_ = 0;
+        handle_ = 0;
     }
 }
 
@@ -50,7 +50,7 @@ sfap::task<void> sfap::net::Socket::send_bytes(std::span<const std::byte> data) 
     while (offset < data.size()) {
         std::span<const std::byte> chunk = data.subspan(offset);
         const auto sent = co_await owner_->socket_send(handle_, chunk);
-        if (!sent && *sent == 0)
+        if (!sent || *sent == 0)
             break;
         offset += *sent;
     }
@@ -66,7 +66,7 @@ sfap::task<void> sfap::net::Socket::recv_bytes(std::span<std::byte> data, bool e
     while (offset < data.size()) {
         std::span<std::byte> chunk = data.subspan(offset);
         const auto received = co_await owner_->socket_recv(handle_, chunk);
-        if (!received && *received == 0)
+        if (!received || *received == 0)
             break;
         offset += *received;
         if (!exact)
