@@ -23,9 +23,15 @@ FetchContent_MakeAvailable( googletest )
 include( GoogleTest )
 
 function ( add_gtest file )
-    get_filename_component( name "${file}" NAME_WE )
-    add_executable( ${name} "${file}" )
+    file( RELATIVE_PATH rel "${CMAKE_SOURCE_DIR}/tests" "${file}" )
+    get_filename_component( dir "${rel}" DIRECTORY )
+    get_filename_component( name "${rel}" NAME_WE )
+
+    add_executable( ${name} ${file} )
     target_link_libraries( ${name} PRIVATE sfap GTest::gtest_main )
+
+    set_target_properties( ${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/${dir}" )
+
     gtest_discover_tests( ${name} DISCOVERY_TIMEOUT 60 )
 endfunction ()
 

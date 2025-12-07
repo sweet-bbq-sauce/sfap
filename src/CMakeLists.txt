@@ -9,8 +9,6 @@ set( SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/error.cpp"
 )
 
-message(${SOURCES})
-
 add_library( sfap ${SOURCES} )
 
 check_cxx_source_compiles(
