@@ -6,12 +6,8 @@ set( CMAKE_CXX_STANDARD 23 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
-find_package( PkgConfig )
-if ( NOT PkgConfig_FOUND )
-    message( ERROR "pkg-config not found" )
-endif ()
-
 include( "${CMAKE_SOURCE_DIR}/cmake/doxygen.cmake" )
+include( "${CMAKE_SOURCE_DIR}/cmake/platform.cmake" )
 include( "${CMAKE_SOURCE_DIR}/cmake/sanitizers.cmake" )
 
 if ( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
@@ -24,15 +20,6 @@ endif ()
 
 include_directories( "${CMAKE_SOURCE_DIR}/include" )
 include_directories( "${CMAKE_BINARY_DIR}/include" )
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    pkg_check_modules( LIBURING liburing )
-    if ( LIBURING_FOUND )
-        set( SUPPORTED_IOURING TRUE )
-    else ()
-        set( SUPPORTED_IOURING FALSE )
-    endif ()
-endif ()
 
 add_subdirectory( "${CMAKE_SOURCE_DIR}/src" )
 

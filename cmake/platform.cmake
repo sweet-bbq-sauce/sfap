@@ -1,0 +1,13 @@
+find_package( PkgConfig )
+if ( NOT PkgConfig_FOUND )
+    message( ERROR "pkg-config not found" )
+endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    pkg_check_modules( LIBURING liburing )
+    if ( LIBURING_FOUND )
+        set( SUPPORTED_IOURING TRUE )
+    else ()
+        set( SUPPORTED_IOURING FALSE )
+    endif ()
+endif ()
